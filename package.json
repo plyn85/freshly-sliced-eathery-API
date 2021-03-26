@@ -1,0 +1,19 @@
+{
+  "name": "freshly-sliced-eathery-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "node ./app.js",
+    "start": "node ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jshint": "^2.12.0",
+    "nodemon": "^2.0.7"
+  }
+}
