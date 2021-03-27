@@ -1,6 +1,7 @@
-//require the menu repository
+//imports
 const menuRepository = require("../repositories/menuRepository");
 const menuValidators = require("../validators/menuValidation");
+const baseValidators = require("../validators/baseValidators.js");
 // return all the meals items
 let getMenu = async () => {
   const products = await menuRepository.getMenu();
@@ -30,8 +31,24 @@ let createMeal = async (meal) => {
   //return the newly inserted meal
   return newlyInsertedMeal;
 };
+
+//get a meal by id
+let getMealById = async (mealId) => {
+  if (!baseValidators.validateId(mealId)) {
+    console.log("getProductsByCatId service error: invalid id parameter");
+    return "invalid parameter";
+  }
+  // console.log("meal id validated: ", mealId);
+
+  //get the product if validation passed
+  const meal = await menuRepository.getMealById(mealId);
+  console.log("meal service :", meal);
+  return meal;
+};
+
 //exports
 module.exports = {
   getMenu,
   createMeal,
+  getMealById,
 };

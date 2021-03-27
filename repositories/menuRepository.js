@@ -6,14 +6,17 @@ const { sql, dbConnPoolPromise } = require("../database/db.js");
 //models
 
 const Meal = require("../models/meals.js");
-
-// Get all meals from the meals table
-// for json path - Tell MS SQL to return results as JSON (avoiding the need to convert here)
-const SQL_SELECT_ALL =
-  "SELECT * FROM dbo.meals ORDER BY _id ASC for json path;";
-// returns inserted identity by menu_id = = SCOPE_IDENTITY()
-const SQL_INSERT =
-  "INSERT INTO dbo.meals (meal_name, meal_description, meal_price) VALUES (@mealName, @mealDescription,@mealPrice); SELECT * from dbo.meals WHERE _id = SCOPE_IDENTITY();";
+//all sql statement in this object;
+const sqlStatements = {
+  //select all and order by id
+  SQL_SELECT_ALL: "SELECT * FROM dbo.meals ORDER BY _id ASC for json path;",
+  // insert a meal to db
+  SQL_INSERT:
+    "INSERT INTO dbo.meals (meal_name, meal_description, meal_price) VALUES (@mealName, @mealDescription,@mealPrice); SELECT * from dbo.meals WHERE _id = SCOPE_IDENTITY();",
+  // get a single meal by it id
+  SQL_SELECT_BY_ID:
+    "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
+};
 
 // Get all the menu items
 let getMenu = async () => {
@@ -27,7 +30,7 @@ let getMenu = async () => {
     const result = await pool
       .request()
       // execute the select all query (defined above)
-      .query(SQL_SELECT_ALL);
+      .query(sqlStatements.SQL_SELECT_ALL);
 
     // first element of the recordset holds products
     meals = result.recordset[0];
@@ -43,7 +46,7 @@ let getMenu = async () => {
 
 // insert a meal to the db
 let createMeal = async (meal) => {
-  console.log(" product repo: ", meal);
+  // console.log(" product repo: ", meal);
   //Declare variables
   let insertedMeal;
   //insert new product
@@ -58,7 +61,7 @@ let createMeal = async (meal) => {
       .input("mealDescription", sql.NVarChar, meal.meal_description)
       .input("mealPrice", sql.Decimal, meal.meal_price)
       //execute query
-      .query(SQL_INSERT);
+      .query(sqlStatements.SQL_INSERT);
     //the newly inserted product is returned by the query
     insertedMeal = result.recordset[0];
   } catch (err) {
@@ -67,8 +70,34 @@ let createMeal = async (meal) => {
   return insertedMeal;
 };
 
+// get a single meal by id
+let getMealById = async (mealId) => {
+  let meal;
+  // console.log("repo meal id:", mealId);
+  // returns a single meal with matching id
+  try {
+    // Get a DB connection and execute SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      // set @id parameter in the query
+      .input("id", sql.Int, mealId)
+      // execute query
+      .query(sqlStatements.SQL_SELECT_BY_ID);
+
+    // Send response with JSON result
+    meal = result.recordset[0];
+  } catch (err) {
+    console.log("DB Error - get product by id: ", err.message);
+  }
+  // console.log("meal returned form db meal repo :", meal);
+  // return the product
+  return meal;
+};
+
 //exports
 module.exports = {
   getMenu,
   createMeal,
+  getMealById,
 };

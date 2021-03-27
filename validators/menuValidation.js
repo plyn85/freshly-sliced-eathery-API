@@ -34,7 +34,7 @@ let validateMeal = (formMeal) => {
     !validator.isEmpty(formMeal.meal_description) &&
     baseValidators.validatePrice(formMeal.meal_price)
   ) {
-    console.log("first stage validation passed :", formMeal);
+    // console.log("first stage validation passed :", formMeal);
     // Validation passed
     // create a new Product instance based on Product model object
     validatedMeal = new Meal(
@@ -48,7 +48,7 @@ let validateMeal = (formMeal) => {
     // debug
     console.log("validateNewMeal(): Validation failed");
   }
-  console.log("second stage validation passed :", validatedMeal);
+  //   console.log("second stage validation passed :", validatedMeal);
   // return new validated product object
   return validatedMeal;
 };
