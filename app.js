@@ -1,7 +1,7 @@
 // require imports packages required by the application
 const express = require("express");
 const cors = require("cors");
-
+const morgan = require("morgan");
 const HOST = "127.0.0.1";
 const PORT = 8000;
 
@@ -14,8 +14,9 @@ app.use((req, res, next) => {
   res.setHeader("Content-Type", "application/json");
   next();
 });
+//morgan
+app.use(morgan("dev"));
 
-// Allow app to support differnt body content types (using the bidyParser package)
 app.use(express.text());
 app.use(express.json()); // support json encoded bodies
 app.use(express.urlencoded({ extended: true })); // support url encoded bodies
@@ -27,18 +28,7 @@ app.use(express.urlencoded({ extended: true })); // support url encoded bodies
 // app.use(cors());
 // app.options("*", cors()); // include before other routes
 app.use(cors({ credentials: true, origin: true }));
-//copied an posted from https://www.zigpoll.com/blog/cors-with-express-and-fetch
-// used instead of cors
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", req.headers.origin);
 
-//   res.header("Access-Control-Allow-Credentials", true);
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept"
-//   );
-//   next();
-// });
 /* Configure app Routes to handle requests from browser */
 // The home page
 app.use("/", require("./controllers/index"));

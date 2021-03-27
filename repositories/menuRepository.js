@@ -38,7 +38,12 @@ let getMenu = async () => {
   return meals;
 };
 
+// insert a meal to the db
+let createMeal = async (meal) => {
+  return `${meal}`;
+};
 //exports
 module.exports = {
   getMenu,
+  createMeal,
 };

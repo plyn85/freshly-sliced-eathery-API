@@ -8,7 +8,7 @@ const { json } = require("body-parser");
 //now all functions exported form the productService will be accessible to this controller
 // const productService = require("../services/productService.js");
 
-//menu route
+//get route for meals
 router.get("/", async (req, res) => {
   //get products
   try {
@@ -22,5 +22,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+//post route for meals
+router.post("/", async (req, res) => {
+  try {
+    //get the meal from the request body
+    const meal = req.body;
+    console.log("Post route meal :", meal);
+    //call the menu service
+    const result = await menuService.createMeal(meal);
+    //send the json result via http
+    res.json(result);
+  } catch (err) {
+    res.send(err.message);
+  }
+});
 // export
 module.exports = router;
