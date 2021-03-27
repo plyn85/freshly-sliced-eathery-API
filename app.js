@@ -43,7 +43,7 @@ app.use(cors({ credentials: true, origin: true }));
 // The home page
 app.use("/", require("./controllers/index"));
 //the menu page
-app.use("/menu", require("./controllers/menuController"));
+app.use("/meals", require("./controllers/menuController"));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

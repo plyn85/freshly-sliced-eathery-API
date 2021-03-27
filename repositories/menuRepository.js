@@ -10,7 +10,7 @@ const Meal = require("../models/meals.js");
 // Get all products from the meals table
 // for json path - Tell MS SQL to return results as JSON (avoiding the need to convert here)
 const SQL_SELECT_ALL =
-  "SELECT * FROM dbo.meals ORDER BY meal_name ASC for json path;";
+  "SELECT * FROM dbo.meals ORDER BY _id ASC for json path;";
 
 // Get all the menu items
 let getMenu = async () => {
