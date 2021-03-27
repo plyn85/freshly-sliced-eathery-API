@@ -46,9 +46,24 @@ let getMealById = async (mealId) => {
   return meal;
 };
 
+//delete the meal by id
+let deleteMeal = async (mealId) => {
+  let deleteResult = false;
+  //validate the input by call the id function form the base validators
+  if (!baseValidators.validateId(mealId)) {
+    console.log("deleteMeal service error: invalid id parameter");
+    return false;
+  }
+  //delete meal by id
+  deleteResult = await menuRepository.deleteMeal(mealId);
+  // console.log(deleteResult, "meal service");
+
+  return deleteResult;
+};
 //exports
 module.exports = {
   getMenu,
   createMeal,
   getMealById,
+  deleteMeal,
 };

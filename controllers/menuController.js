@@ -53,5 +53,22 @@ router.get("/:id", async (req, res) => {
     res.send(err.message);
   }
 });
+
+//delete  a single meal route
+router.delete("/:id", async (req, res) => {
+  // let result;
+  //read the id parameter of the request url
+  const mealId = req.params.id;
+  // console.log("meal controller mealId :", mealId);
+  //get products by id
+  try {
+    const result = await menuService.deleteMeal(mealId);
+    //should return true or false
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+    res.send(err.message);
+  }
+});
 // export
 module.exports = router;

@@ -16,6 +16,8 @@ const sqlStatements = {
   // get a single meal by it id
   SQL_SELECT_BY_ID:
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
+  // delete a meal by its id
+  SQL_DELETE: "DELETE FROM dbo.meals WHERE _id = @id;",
 };
 
 // Get all the menu items
@@ -95,9 +97,37 @@ let getMealById = async (mealId) => {
   return meal;
 };
 
+// delete a single meal by its id
+let deleteMeal = async (mealId) => {
+  let rowsAffected = 0;
+
+  // returns a single product with matching id
+  try {
+    // Get a DB connection and execute SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      // set @id parameter in the query
+      .input("id", sql.Int, mealId)
+      // execute query
+      .query(sqlStatements.SQL_DELETE);
+    //Was the product deleted?
+    rowsAffected = Number(result.rowsAffected);
+    console.log(rowsAffected);
+  } catch (err) {
+    console.log("DB Error - get product by id: ", err.message);
+  }
+  // if noting is deleted
+  if (rowsAffected === 0) {
+    return false;
+  } else {
+    return true;
+  }
+};
 //exports
 module.exports = {
   getMenu,
   createMeal,
   getMealById,
+  deleteMeal,
 };
