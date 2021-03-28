@@ -1,12 +1,9 @@
-// Import router package
+// Imports
 const router = require("express").Router();
-//import menu service
+
 const menuService = require("../services/menuService");
 
 const { json } = require("body-parser");
-//require the product service
-//now all functions exported form the productService will be accessible to this controller
-// const productService = require("../services/productService.js");
 
 //get route for meals
 router.get("/", async (req, res) => {
@@ -43,7 +40,7 @@ router.get("/:id", async (req, res) => {
   //read the id parameter of the request url
   const mealId = req.params.id;
   // console.log(mealId, "controller");
-  //get products by id
+  //get meal by id
   try {
     const result = await menuService.getMealById(mealId);
     res.json(result);
@@ -60,7 +57,7 @@ router.delete("/:id", async (req, res) => {
   //read the id parameter of the request url
   const mealId = req.params.id;
   // console.log("meal controller mealId :", mealId);
-  //get products by id
+  //get meal by id
   try {
     const result = await menuService.deleteMeal(mealId);
     //should return true or false

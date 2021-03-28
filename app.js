@@ -34,7 +34,8 @@ app.use(cors({ credentials: true, origin: true }));
 app.use("/", require("./controllers/index"));
 //the menu page
 app.use("/meals", require("./controllers/menuController"));
-
+//the cart page
+app.use("/cart", require("./controllers/cartController"));
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   var err = new Error("Not Found: " + req.method + ":" + req.originalUrl);
