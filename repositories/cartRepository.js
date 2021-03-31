@@ -9,7 +9,7 @@ const sqlStatements = {
   SQL_SELECT_ALL: "SELECT * FROM dbo.meals ORDER BY _id ASC for json path;",
   // insert a meal to db
   SQL_INSERT:
-    "INSERT INTO dbo.cartItems (quantity,price,total) VALUES (@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.cartItems (meal_id,quantity,price,total) VALUES (@mealId,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
   // get a single meal by it id
   SQL_SELECT_BY_ID:
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
@@ -30,6 +30,7 @@ let addItemToCart = async (cartItem) => {
       .request()
       //set the name parameters in query
       // checks for sql injection
+      .input("mealId", sql.Int, cartItem.meal_id)
       .input("cartItemQuantity", sql.Int, cartItem.quantity)
       .input("cartItemPrice", sql.Decimal, cartItem.price)
       .input("cartItemTotal", sql.Decimal, cartItem.total)

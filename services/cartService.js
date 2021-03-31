@@ -24,7 +24,7 @@ let addItemToCart = async (cartItem) => {
     //log the result
     console.log("cartService.addItemToCart(): form validation failed");
   }
-  console.log("menu service newly inserted: ", newlyInsertedCartItem);
+  console.log("cart service newly inserted: ", newlyInsertedCartItem);
   //return the newly inserted meal
   return newlyInsertedCartItem;
 };

@@ -11,7 +11,7 @@ const CartItem = require("../models/cartItems.js");
 let validateCartItem = (formCartItem) => {
   // Declare constants and variables
   let validatedCartItem;
-  // New product has no id
+
   let cartItemId = 0;
 
   // debug to console - if no data
@@ -26,25 +26,28 @@ let validateCartItem = (formCartItem) => {
 
   if (
     baseValidators.validateId(cartItemId) &&
+    baseValidators.validateId(formCartItem.meal_id) &&
     baseValidators.validatePositiveNumber(formCartItem.quantity) &&
     baseValidators.validatePrice(formCartItem.price) &&
     baseValidators.validatePrice(formCartItem.total)
   ) {
-    // console.log("first stage validation passed :", cartItemMeal);
+    console.log("first stage validation passed :", formCartItem);
     // Validation passed
     // create a new cartItem instance based on CartItem model object
     validatedCartItem = new CartItem(
-      cartItemId,
+      formCartItem._id,
+      formCartItem.meal_id,
       formCartItem.quantity,
       formCartItem.price,
       formCartItem.total
     );
   } else {
     // debug
-    console.log("validateNewMeal(): Validation failed");
+    console.log("validateCartItem(): Validation failed");
   }
   //   console.log("second stage validation passed :", validatedMeal);
   // return new validated product object
+  console.log("val", validatedCartItem);
   return validatedCartItem;
 };
 // Module exports
