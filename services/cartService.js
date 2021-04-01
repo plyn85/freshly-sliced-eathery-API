@@ -1,10 +1,9 @@
 //imports
 const cartRepository = require("../repositories/cartRepository");
 const cartValidators = require("../validators/cartValidation");
-const baseValidators = require("../validators/baseValidators.js");
 
-//create a new meal
-let addItemToCart = async (cartItem) => {
+//add a new cart item to the cart
+let addItemToCart = async (cartItem, mealDetails, quantity) => {
   //declare variable
   let newlyInsertedCartItem;
   //log to the console
@@ -29,5 +28,11 @@ let addItemToCart = async (cartItem) => {
   return newlyInsertedCartItem;
 };
 
+// return all the cart items
+let getCart = async () => {
+  const cart = await cartRepository.getCart();
+  return cart;
+};
+
 //exports
-module.exports = { addItemToCart };
+module.exports = { addItemToCart, getCart };
