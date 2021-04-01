@@ -12,15 +12,10 @@ router.post("/", async (req, res) => {
     // and the cartItem
     const cartItem = req.body;
     const meal_id = req.body.meal_id;
-    const quantity = Number.parseInt(req.body.quantity);
     //get a single meal by id with the meal id form the request body as the paramter
     const mealDetails = await menuService.getMealById(meal_id);
     //call the menu service pass them the mealDetails and the quantity
-    const result = await cartService.addItemToCart(
-      cartItem,
-      mealDetails,
-      quantity
-    );
+    const result = await cartService.addItemToCart(mealDetails, cartItem);
     //send the json result via http
     res.json(result);
   } catch (err) {
