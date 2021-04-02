@@ -76,12 +76,27 @@ let deleteCartItem = async (cartItemId) => {
     console.log("deleteCartItem service error: invalid id parameter");
     return false;
   }
-  //delete meal by id
+  //delete cartItem by id
   deleteResult = await cartRepository.deleteCartItem(cartItemId);
   // console.log(deleteResult, "meal service");
 
   return deleteResult;
 };
 
+//delete a cartItem by id
+let deleteCart = async (cartId) => {
+  let deleteResult = false;
+  //validate the input by call the id function form the base validators
+  if (!baseValidators.validateId(cartId)) {
+    console.log("deleteCartItem service error: invalid id parameter");
+    return false;
+  }
+  //delete cart by id
+  deleteResult = await cartRepository.deleteCart(cartId);
+  // console.log(deleteResult, "meal service");
+
+  return deleteResult;
+};
+
 //exports
-module.exports = { addItemToCart, getAllCartItems, deleteCartItem };
+module.exports = { addItemToCart, getAllCartItems, deleteCartItem, deleteCart };

@@ -21,7 +21,9 @@ const sqlStatements = {
   SQL_SELECT_BY_ID:
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
   // delete a meal by its id
-  SQL_DELETE: "DELETE FROM dbo.cartItems WHERE _id = @id;",
+  SQL_DELETE_CART_ITEM: "DELETE FROM dbo.cartItems WHERE _id = @id;",
+  //delete cart by its id
+  SQL_DELETE_CART: "DELETE FROM dbo.cart WHERE _id = @id;",
 };
 
 // insert a meal to the db
@@ -139,7 +141,35 @@ let deleteCartItem = async (cartItemId) => {
       // set @id parameter in the query
       .input("id", sql.Int, cartItemId)
       // execute query
-      .query(sqlStatements.SQL_DELETE);
+      .query(sqlStatements.SQL_DELETE_CART_ITEM);
+    //Was the product deleted?
+    rowsAffected = Number(result.rowsAffected);
+    console.log(rowsAffected);
+  } catch (err) {
+    console.log("DB Error - deleteCartItem by id: ", err.message);
+  }
+  // if noting is deleted
+  if (rowsAffected === 0) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
+// delete a single meal by its id
+let deleteCart = async (cartId) => {
+  let rowsAffected = 0;
+
+  // returns a single product with matching id
+  try {
+    // Get a DB connection and execute SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      // set @id parameter in the query
+      .input("id", sql.Int, cartId)
+      // execute query
+      .query(sqlStatements.SQL_DELETE_CART);
     //Was the product deleted?
     rowsAffected = Number(result.rowsAffected);
     console.log(rowsAffected);
@@ -160,4 +190,5 @@ module.exports = {
   createNewCart,
   getCart,
   deleteCartItem,
+  deleteCart,
 };
