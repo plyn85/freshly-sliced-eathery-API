@@ -1,56 +1,31 @@
-// Input validation package
-// https://www.npmjs.com/package/validator
-const validator = require("validator");
+//imports
 const baseValidators = require("./baseValidators.js");
+const Cart = require("../models/cart.js");
 
-// models
-// const Meal = require("../models/cartItems.js");
-const CartItem = require("../models/cartItems.js");
-// Validate the body data, sent by the client, for a new cartItem
-// It needs to be validated before using in the application
-let validateCartItem = (mealDetails, formCartItem) => {
-  // Declare constants and variables
-  let validatedCartItem;
+//needs to be validated before being used in the application
 
-  let cartItemId = 0;
-  //calculate the total for the cart item
-  let total = mealDetails.meal_price * formCartItem.quantity;
-
-  // debug to console - if no data
-  if (formCartItem === null) {
-    console.log("validateCartItem(): Parameter is null");
-  }
-
-  // Check if id field is included in the form object
-  if (formCartItem.hasOwnProperty("_id")) {
-    cartItemId = formCartItem._id;
-  }
-
+let validateCart = (cartItem) => {
+  //set the cart id (PK) to match the cartId from cart
+  //item (FK)
+  let id = 1;
+  let userId = 1;
+  let subTotal = 0;
   if (
-    baseValidators.validateId(cartItemId) &&
-    baseValidators.validateId(mealDetails._id) &&
-    baseValidators.validatePositiveNumber(formCartItem.quantity) &&
-    baseValidators.validatePrice(mealDetails.meal_price) &&
-    baseValidators.validatePrice(total)
+    baseValidators.validateId(id) &&
+    baseValidators.validateId(userId) &&
+    baseValidators.validatePrice(subTotal)
   ) {
     // Validation passed
-    // create a new cartItem instance based on CartItem model object
-    validatedCartItem = new CartItem(
-      cartItemId,
-      mealDetails._id,
-      formCartItem.quantity,
-      mealDetails.meal_price,
-      total
-    );
-    console.log(validatedCartItem, "cart val passed");
+    // create a new cart instance based on Cart model object
+    validatedCart = new Cart(id, userId, subTotal);
+
+    console.log(validatedCart, "cart val passed");
   } else {
     // debug
     console.log("validateCartItem(): Validation failed");
   }
-  return validatedCartItem;
+  return validatedCart;
 };
-// Module exports
-// expose these functions
-module.exports = {
-  validateCartItem,
-};
+
+//exports
+module.exports = { validateCart };

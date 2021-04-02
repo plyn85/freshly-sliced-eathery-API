@@ -9,7 +9,10 @@ const sqlStatements = {
   SQL_SELECT_ALL: "SELECT * FROM dbo.cart ORDER BY _id ASC for json path;",
   // insert a meal to db
   SQL_INSERT:
-    "INSERT INTO dbo.cartItems (meal_id,quantity,price,total) VALUES (@mealId,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.cartItems (cart_id,meal_id,quantity,price,total) VALUES (@cartId,@mealId,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
+  //create a new cart in the db
+  SQL_INSERT_NEW_CART:
+    "INSERT INTO dbo.cart (user_id,subtotal) VALUES (@userId,@subTotal) SELECT * from dbo.cart WHERE _id = SCOPE_IDENTITY();",
   // get a single meal by it id
   SQL_SELECT_BY_ID:
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
@@ -19,7 +22,6 @@ const sqlStatements = {
 
 // insert a meal to the db
 let addItemToCart = async (cartItem) => {
-  //   console.log(" product repo: ", meal);
   //   Declare variables
   let insertedCartItem;
   //insert new cartItem
@@ -30,6 +32,7 @@ let addItemToCart = async (cartItem) => {
       .request()
       //set the name parameters in query
       // checks for sql injection
+      .input("cartId", sql.Int, cartItem.cart_id)
       .input("mealId", sql.Int, cartItem.meal_id)
       .input("cartItemQuantity", sql.Int, cartItem.quantity)
       .input("cartItemPrice", sql.Decimal, cartItem.price)
@@ -44,6 +47,29 @@ let addItemToCart = async (cartItem) => {
   return insertedCartItem;
 };
 
+//create a cart
+let createNewCart = async (cart) => {
+  //   Declare variables
+  let newCart;
+  //insert new cartItem
+  try {
+    //get a database connection and insert SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      //set the name parameters in query
+      // checks for sql injection
+      .input("userId", sql.Int, cart.userId)
+      .input("subtotal", sql.Int, cart.subTotal)
+      //execute query
+      .query(sqlStatements.SQL_INSERT_NEW_CART);
+    //the newly inserted product is returned by the query
+    newCart = result.recordset[0];
+  } catch (err) {
+    console.log("DB Error - error inserting a new cartItem: ", err.message);
+  }
+  return newCart;
+};
 // Get all the cart items
 let getCart = async () => {
   // define variable to store the cart
@@ -70,4 +96,4 @@ let getCart = async () => {
   return cart;
 };
 //exports
-module.exports = { addItemToCart, getCart };
+module.exports = { addItemToCart, getCart, createNewCart };

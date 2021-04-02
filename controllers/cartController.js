@@ -8,13 +8,12 @@ const { json } = require("body-parser");
 //post route for meals
 router.post("/", async (req, res) => {
   try {
-    //get the meal id and the quantity from the body
-    // and the cartItem
+    //get the meal id and the entire body from the body of the request
     const cartItem = req.body;
     const meal_id = req.body.meal_id;
-    //get a single meal by id with the meal id form the request body as the paramter
+    //get a single meal by id and match with the meal id from the request body as the paramter
     const mealDetails = await menuService.getMealById(meal_id);
-    //call the menu service pass them the mealDetails and the quantity
+    //call the menu service pass them the mealDetails and the cartItem
     const result = await cartService.addItemToCart(mealDetails, cartItem);
     //send the json result via http
     res.json(result);
