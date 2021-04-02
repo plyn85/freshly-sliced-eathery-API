@@ -31,5 +31,21 @@ router.get("/", async (req, res) => {
     res.send(err.message);
   }
 });
+
+//delete  a single cartItem route
+router.delete("/:id", async (req, res) => {
+  //read the id parameter of the request url
+  const cartItemId = req.params.id;
+  // console.log("delete a cartItem controller :", cartItemId);
+  //get meal by id
+  try {
+    const result = await cartService.deleteCartItem(cartItemId);
+    //should return true or false
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+    res.send(err.message);
+  }
+});
 // export
 module.exports = router;

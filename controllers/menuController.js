@@ -53,7 +53,6 @@ router.get("/:id", async (req, res) => {
 
 //delete  a single meal route
 router.delete("/:id", async (req, res) => {
-  // let result;
   //read the id parameter of the request url
   const mealId = req.params.id;
   // console.log("meal controller mealId :", mealId);

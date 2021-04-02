@@ -2,6 +2,7 @@
 const cartRepository = require("../repositories/cartRepository");
 const cartItemValidation = require("../validators/cartItemValidation");
 const cartValidation = require("../validators/cartValidation");
+const baseValidators = require("../validators/baseValidators");
 //add a new cart item to the cart
 let addItemToCart = async (mealDetails, cartItem) => {
   //call the cart repo
@@ -30,8 +31,9 @@ let addItemToCart = async (mealDetails, cartItem) => {
   else {
     const cartItems = await cartRepository.getAllCartItems();
     for (let i = 0; i < cartItems.length; i++) {
-      console.log(cartItems[i], "cart cont items");
+      console.log(cartItems[i].total, "cart cont items");
     }
+
     //declare variable
     let newlyInsertedCartItem;
 
@@ -66,5 +68,20 @@ let getAllCartItems = async () => {
   return cartItems;
 };
 
+//delete a cartItem by id
+let deleteCartItem = async (cartItemId) => {
+  let deleteResult = false;
+  //validate the input by call the id function form the base validators
+  if (!baseValidators.validateId(cartItemId)) {
+    console.log("deleteCartItem service error: invalid id parameter");
+    return false;
+  }
+  //delete meal by id
+  deleteResult = await cartRepository.deleteCartItem(cartItemId);
+  // console.log(deleteResult, "meal service");
+
+  return deleteResult;
+};
+
 //exports
-module.exports = { addItemToCart, getAllCartItems };
+module.exports = { addItemToCart, getAllCartItems, deleteCartItem };
