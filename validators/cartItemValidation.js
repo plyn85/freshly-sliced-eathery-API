@@ -3,7 +3,7 @@ const baseValidators = require("./baseValidators.js");
 const CartItem = require("../models/cartItems.js");
 
 // needs to be validated before using in the application
-let validateCartItem = (mealDetails, formCartItem) => {
+let validateCartItem = (mealDetails, formCartItem, cart) => {
   // Declare constants and variables
   let validatedCartItem;
   let cartItemId = 0;
@@ -15,9 +15,9 @@ let validateCartItem = (mealDetails, formCartItem) => {
     console.log("validateCartItem(): Parameter is null");
   }
 
-  // Check if id field is included in the form object
-  if (formCartItem.hasOwnProperty("_id")) {
-    cartItemId = formCartItem._id;
+  // Check if id field is included in the cart
+  if (cart.hasOwnProperty("_id")) {
+    cartId = cart._id;
   }
 
   if (
@@ -39,7 +39,7 @@ let validateCartItem = (mealDetails, formCartItem) => {
       total
     );
 
-    console.log(validatedCart, "cart val passed");
+    console.log(validatedCartItem, "cartItem val passed");
   } else {
     // debug
     console.log("validateCartItem(): Validation failed");

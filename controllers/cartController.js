@@ -25,8 +25,8 @@ router.post("/", async (req, res) => {
 //route to get all cart items from cart
 router.get("/", async (req, res) => {
   try {
-    const cart = await cartService.getCart();
-    res.send(cart);
+    const result = await cartService.getAllCartItems();
+    res.json(result);
   } catch (err) {
     res.send(err.message);
   }
