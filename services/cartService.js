@@ -17,7 +17,6 @@ let addItemToCart = async (mealDetails, cartItem) => {
     //if the validator validates the cart to database
     if (validatedCart != null) {
       newCart = await cartRepository.createNewCart(validatedCart);
-      console.log(newCart, "cart cont");
     } else {
       //validation for cart failed
       newCart = { error: "invalid cartItem" };
