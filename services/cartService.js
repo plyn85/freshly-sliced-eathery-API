@@ -7,23 +7,20 @@ const baseValidators = require("../validators/baseValidators");
 let addItemToCart = async (mealDetails, cartItem) => {
   let newCart;
   //call the cart repo to check if a cart exists
-  const cart = await cartRepository.getCart();
+  let cart = await cartRepository.getCart();
   console.log("cart before new cart", cart);
   //if the cart does not exist
-  if (!cart) {
+  if (cart == null) {
     console.log("cart does not exist");
     //declare variable
-    //call the cart validator and pass in the meal details and the item quantity. validateCart function will return a value with both cart and cartItem validated
-    const { validatedCart, validatedCartItem } = cartValidation.validateCart(
-      mealDetails,
-      cartItem
-    );
-    //if the validator validates the cart and cart item add both to database
-    if (validatedCart != null && validatedCartItem != null) {
+    //call the cart validator and pass in the meal details and the item quantity
+    const validatedCart = cartValidation.validateCart(mealDetails, cartItem);
+    //if the validator validates the cart add to database
+    if (validatedCart != null) {
       newCart = await cartRepository.createNewCart(validatedCart);
     } else {
       //validation for cart failed
-      cartItem = { error: "invalid cart or cartItem" };
+      newCart = { error: "invalid cart or cartItem" };
 
       //log the result
       console.log("cartService.createCart(): form validation failed");
@@ -31,10 +28,10 @@ let addItemToCart = async (mealDetails, cartItem) => {
     console.log(newCart, "cart service");
   }
   //call the cart repo to check if a cart exists again after cart creation
-  const cartAfterCreated = await cartRepository.getCart();
-  console.log("cart after new cart", cart);
+  cart = await cartRepository.getCart();
+  console.log("cart after cartCreated", cart);
   //if the cart exists
-  if (newCart || cartAfterCreated) {
+  if (cart != null) {
     // const cartItems = await cartRepository.getAllCartItems();
     // for (let i = 0; i < cartItems.length; i++) {
     //   console.log(cartItems[i].total, "cart cont items");
@@ -47,7 +44,7 @@ let addItemToCart = async (mealDetails, cartItem) => {
     let validatedCartItem = cartItemValidation.validateCartItem(
       mealDetails,
       cartItem,
-      cartAfterCreated
+      cart
     );
     //if the validator validates add the cartItem to database
 
