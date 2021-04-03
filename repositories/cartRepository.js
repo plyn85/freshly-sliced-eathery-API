@@ -55,9 +55,8 @@ let addItemToCart = async (cartItem) => {
 
 //create a cart
 let createNewCart = async (cart) => {
-  console.log(cart, "cart repo");
   //   Declare variables
-  let newCart;
+  let cartCreated = false;
   //insert new cart
   try {
     //get a database connection and insert SQL
@@ -72,11 +71,11 @@ let createNewCart = async (cart) => {
       .query(sqlStatements.SQL_INSERT_NEW_CART);
     //the newly inserted product is returned by the query
     newCart = result.recordset[0];
-    console.log(newCart, "cart repo");
+    cartCreated = true;
   } catch (err) {
     console.log("DB Error - error inserting a new cart: ", err.message);
   }
-  return newCart;
+  return cartCreated;
 };
 // Get all the cart items
 let getAllCartItems = async () => {
@@ -126,7 +125,7 @@ let getCart = async () => {
     console.log("DB Error - get cart: ", err.message);
   }
 
-  // return products
+  // return all cartItems
   return cart;
 };
 

@@ -7,7 +7,7 @@ let validateCartItem = (mealDetails, formCartItem, cart) => {
   // Declare constants and variables
   let validatedCartItem;
   let cartItemId = 0;
-  let cartId = 1;
+  let cartId = cart[0]._id;
   //calculate the total for the cart item
   let total = mealDetails.meal_price * formCartItem.quantity;
   // debug to console - if no data
@@ -16,10 +16,8 @@ let validateCartItem = (mealDetails, formCartItem, cart) => {
   }
 
   // Check if id field is included in the cart
-  if (cart.hasOwnProperty("_id")) {
-    cartId = cart._id;
-  }
 
+  console.log(cart[0], "cart val");
   if (
     baseValidators.validateId(cartItemId) &&
     baseValidators.validateId(cartId) &&

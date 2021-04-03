@@ -5,7 +5,8 @@ const cartService = require("../services/cartService");
 
 const { json } = require("body-parser");
 
-//post route will add item to cart
+//post route will add item to cart if it exists
+// and if it does not it will create a cart and then add an item
 router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
@@ -32,7 +33,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-//delete  a single cartItem route
+//delete  a single cartItem
 router.delete("/:id", async (req, res) => {
   //read the id parameter of the request url
   const cartItemId = req.params.id;
