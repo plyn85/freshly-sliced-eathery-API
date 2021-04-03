@@ -55,6 +55,7 @@ let addItemToCart = async (cartItem) => {
 
 //create a cart
 let createNewCart = async (cart) => {
+  console.log(cart, "cart repo");
   //   Declare variables
   let newCart;
   //insert new cart
@@ -65,12 +66,13 @@ let createNewCart = async (cart) => {
       .request()
       //set the name parameters in query
       // checks for sql injection
-      .input("userId", sql.Int, cart.userId)
-      .input("subtotal", sql.Int, cart.subTotal)
+      .input("userId", sql.Int, cart.user_id)
+      .input("subtotal", sql.Int, cart.subtotal)
       //execute query
       .query(sqlStatements.SQL_INSERT_NEW_CART);
     //the newly inserted product is returned by the query
     newCart = result.recordset[0];
+    console.log(newCart, "cart repo");
   } catch (err) {
     console.log("DB Error - error inserting a new cart: ", err.message);
   }

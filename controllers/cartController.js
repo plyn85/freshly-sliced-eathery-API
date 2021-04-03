@@ -5,7 +5,7 @@ const cartService = require("../services/cartService");
 
 const { json } = require("body-parser");
 
-//post route for meals
+//post route will add item to cart
 router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request

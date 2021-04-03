@@ -5,12 +5,11 @@ const Cart = require("../models/cart.js");
 //needs to be validated before being used in the application
 
 let validateCart = (mealDetails, formCartItem) => {
-  //declare variables
+  //declare variables and constants
   let validatedCart;
-  //set the cart id (PK) to match the cartId from cart
-  //item (FK)
   let id = 1;
   let userId = 1;
+  //calculate the subtotal for the cart
   let subTotal = mealDetails.meal_price * formCartItem.quantity;
   // debug to console - if no data
   if (formCartItem === null) {

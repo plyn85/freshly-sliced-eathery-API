@@ -5,21 +5,21 @@ const cartValidation = require("../validators/cartValidation");
 const baseValidators = require("../validators/baseValidators");
 //add a new cart item to the cart
 let addItemToCart = async (mealDetails, cartItem) => {
-  //call the cart repo
+  //call the cart repo to check if a cart exists
   const cart = await cartRepository.getCart();
   //if the cart does not exist
   if (!cart) {
-    console.log("cart those not exist");
+    console.log("cart does not exist");
     //declare variable
     let newCart;
     //call the product validator and pass in the meal details and the item quantity
     let validatedCart = cartValidation.validateCart(mealDetails, cartItem);
-    //if the validator validates the cartItem to database
-
+    //if the validator validates the cart to database
     if (validatedCart != null) {
       newCart = await cartRepository.createNewCart(validatedCart);
+      console.log(newCart, "cart cont");
     } else {
-      //validation for product failed
+      //validation for cart failed
       newCart = { error: "invalid cartItem" };
 
       //log the result
@@ -29,10 +29,10 @@ let addItemToCart = async (mealDetails, cartItem) => {
   }
   //if the cart exists
   else {
-    const cartItems = await cartRepository.getAllCartItems();
-    for (let i = 0; i < cartItems.length; i++) {
-      console.log(cartItems[i].total, "cart cont items");
-    }
+    // const cartItems = await cartRepository.getAllCartItems();
+    // for (let i = 0; i < cartItems.length; i++) {
+    //   console.log(cartItems[i].total, "cart cont items");
+    // }
 
     //declare variable
     let newlyInsertedCartItem;
