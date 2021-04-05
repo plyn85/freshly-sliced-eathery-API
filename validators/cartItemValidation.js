@@ -1,9 +1,9 @@
 // imports
 const baseValidators = require("./baseValidators.js");
 const CartItem = require("../models/cartItems.js");
-
+const validator = require("validator");
 // needs to be validated before using in the application
-let validateCartItem = (mealDetails, formCartItem, cart, subTotal) => {
+let validateCartItem = (mealDetails, formCartItem, cart) => {
   // Declare constants and variables
   let validatedCartItem;
   let cartItemId = 0;
@@ -19,10 +19,11 @@ let validateCartItem = (mealDetails, formCartItem, cart, subTotal) => {
     baseValidators.validateId(cartItemId) &&
     baseValidators.validateId(cartId) &&
     baseValidators.validateId(mealDetails._id) &&
+    !validator.isEmpty(mealDetails.meal_name) &&
     baseValidators.validatePositiveNumber(formCartItem.quantity) &&
     baseValidators.validatePrice(mealDetails.meal_price) &&
-    baseValidators.validatePrice(total) &&
-    baseValidators.validatePrice(subTotal)
+    baseValidators.validatePrice(total)
+    // baseValidators.validatePrice(subTotal)
   ) {
     // Validation passed
     // create a new cartItem instance based on CartItem model object
@@ -30,6 +31,7 @@ let validateCartItem = (mealDetails, formCartItem, cart, subTotal) => {
       cartItemId,
       cartId,
       mealDetails._id,
+      validator.escape(mealDetails.meal_name),
       formCartItem.quantity,
       mealDetails.meal_price,
       total

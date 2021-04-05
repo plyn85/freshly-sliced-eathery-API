@@ -6,7 +6,6 @@ const baseValidators = require("../validators/baseValidators");
 //add a new cart item to the cart
 let addItemToCart = async (mealDetails, cartItem) => {
   //constants and variables
-  let subTotal = 0;
   let newCart;
   let cart;
   //call the cart repo to check if a cart exists
@@ -44,8 +43,7 @@ let addItemToCart = async (mealDetails, cartItem) => {
     let validatedCartItem = cartItemValidation.validateCartItem(
       mealDetails,
       cartItem,
-      cart,
-      subTotal
+      cart
     );
     //if the validator validates add the cartItem to database
 
@@ -57,18 +55,20 @@ let addItemToCart = async (mealDetails, cartItem) => {
       //validation for cartItem failed
       newlyInsertedCartItem = { error: "invalid cartItem" };
     }
-    //call all the cartItems once a new item has been inserted
-    const cartItems = await cartRepository.getAllCartItems();
-    // loop trough the cartItems calculating the subTotal
-    for (let item of cartItems) {
-      subTotal += item.quantity * item.price;
-    }
-    console.log(subTotal, "subTotal");
 
     return newlyInsertedCartItem;
   }
 };
 
+// use later for update cart
+// let subTotal = 0;
+// //call all the cartItems once a new item has been inserted
+// const cartItems = await cartRepository.getAllCartItems();
+// // loop trough the cartItems calculating the subTotal
+// for (let item of cartItems) {
+//   subTotal += item.quantity * item.price;
+// }
+// console.log(subTotal, "subTotal");
 // return all the cart items
 let getAllCartItems = async () => {
   const cartItems = await cartRepository.getAllCartItems();

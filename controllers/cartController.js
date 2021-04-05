@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
     const cartItem = req.body;
-    const meal_id = req.body.meal_id;
+    const meal_id = req.body._id;
     //get a single meal by id and match with the meal id from the request body as the paramter
     const mealDetails = await menuService.getMealById(meal_id);
     //call the menu service pass them the mealDetails and the cartItem
