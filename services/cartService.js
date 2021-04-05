@@ -5,12 +5,17 @@ const cartValidation = require("../validators/cartValidation");
 const baseValidators = require("../validators/baseValidators");
 //add a new cart item to the cart
 let addItemToCart = async (mealDetails, cartItem) => {
+  //constants and variables
+  let subTotal = 0;
   let newCart;
+  let cart;
   //call the cart repo to check if a cart exists
-  let cart = await cartRepository.getCart();
-  console.log("cart before new cart", cart);
+  cart = await cartRepository.getCart();
+  console.log("cart before cart created", cart);
   //if the cart does not exist
   if (cart == null) {
+    //constants and variables
+
     console.log("cart does not exist");
     //declare variable
     //call the cart validator and pass in the meal details and the item quantity
@@ -25,26 +30,22 @@ let addItemToCart = async (mealDetails, cartItem) => {
       //log the result
       console.log("cartService.createCart(): form validation failed");
     }
-    console.log(newCart, "cart service");
+    console.log("New cart successfully created :", newCart);
   }
   //call the cart repo to check if a cart exists again after cart creation
   cart = await cartRepository.getCart();
   console.log("cart after cartCreated", cart);
   //if the cart exists
   if (cart != null) {
-    // const cartItems = await cartRepository.getAllCartItems();
-    // for (let i = 0; i < cartItems.length; i++) {
-    //   console.log(cartItems[i].total, "cart cont items");
-    // }
-
     //declare variable
     let newlyInsertedCartItem;
 
-    //call the product validator and pass in the meal details and the item quantity
+    //call the product validator and pass in the meal details and the item quantity and the cart
     let validatedCartItem = cartItemValidation.validateCartItem(
       mealDetails,
       cartItem,
-      cart
+      cart,
+      subTotal
     );
     //if the validator validates add the cartItem to database
 
@@ -53,13 +54,17 @@ let addItemToCart = async (mealDetails, cartItem) => {
         validatedCartItem
       );
     } else {
-      //validation for product failed
+      //validation for cartItem failed
       newlyInsertedCartItem = { error: "invalid cartItem" };
-
-      //log the result
-      console.log("cartService.addItemToCart(): form validation failed");
     }
-    //return the newly inserted meal
+    //call all the cartItems once a new item has been inserted
+    const cartItems = await cartRepository.getAllCartItems();
+    // loop trough the cartItems calculating the subTotal
+    for (let item of cartItems) {
+      subTotal += item.quantity * item.price;
+    }
+    console.log(subTotal, "subTotal");
+
     return newlyInsertedCartItem;
   }
 };

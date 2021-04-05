@@ -60,10 +60,31 @@ let deleteMeal = async (mealId) => {
 
   return deleteResult;
 };
+
+//updates a  meal
+let updateMeal = async (meal) => {
+  console.log("put request");
+  // Declare variables and constants
+  let updatedMeal;
+  // call the product validator
+  let validatedMeal = menuValidators.validateMeal(meal);
+
+  // If validation returned a product object - save to database
+  if (validatedMeal != null) {
+    updatedMeal = await menuRepository.updateMeal(validatedMeal);
+  } else {
+    // Product data failed validation
+    updatedMeal = { error: "Meal update failed" };
+    // debug info
+    console.log("menuService.updateMeal(): form data validate failed");
+  }
+  return updatedMeal;
+};
 //exports
 module.exports = {
   getMenu,
   createMeal,
   getMealById,
   deleteMeal,
+  updateMeal,
 };

@@ -75,7 +75,7 @@ let createNewCart = async (cart) => {
   } catch (err) {
     console.log("DB Error - error inserting a new cart: ", err.message);
   }
-  return cartCreated;
+  return { newCart, cartCreated };
 };
 // Get all the cart items
 let getAllCartItems = async () => {

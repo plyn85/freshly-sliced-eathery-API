@@ -24,19 +24,12 @@ let validateMeal = (formMeal) => {
     mealId = formMeal._id;
   }
 
-  // Validate form data for new meal fields
-  // Creating a meal does not need a meal id
-  // Adding '' to the numeric values makes them strings for validation purposes ()
-  // appending + '' to numbers as the validator only works with strings
   if (
     baseValidators.validateId(mealId) &&
     !validator.isEmpty(formMeal.meal_name) &&
     !validator.isEmpty(formMeal.meal_description) &&
     baseValidators.validatePrice(formMeal.meal_price)
   ) {
-    // console.log("first stage validation passed :", formMeal);
-    // Validation passed
-    // create a new Product instance based on Product model object
     validatedMeal = new Meal(
       mealId,
       // escape is to sanitize - it removes/ encodes any html tags
@@ -48,12 +41,11 @@ let validateMeal = (formMeal) => {
     // debug
     console.log("validateNewMeal(): Validation failed");
   }
-  //   console.log("second stage validation passed :", validatedMeal);
-  // return new validated product object
+
   return validatedMeal;
 };
-// Module exports
-// expose these functions
+// exports
+
 module.exports = {
   validateMeal,
 };

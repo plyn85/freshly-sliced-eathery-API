@@ -5,7 +5,6 @@ const { sql, dbConnPoolPromise } = require("../database/db.js");
 
 //models
 
-const Meal = require("../models/meals.js");
 //all sql statement in this object;
 const sqlStatements = {
   //select all and order by id
@@ -18,6 +17,8 @@ const sqlStatements = {
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
   // delete a meal by its id
   SQL_DELETE: "DELETE FROM dbo.meals WHERE _id = @id;",
+  SQL_UPDATE:
+    "UPDATE dbo.meals SET meal_name = @mealName,meal_description = @mealDescription, meal_price = @mealPrice WHERE _id = @id; SELECT * FROM dbo.meals WHERE _id = @id;",
 };
 
 // Get all the menu items
@@ -124,10 +125,39 @@ let deleteMeal = async (mealId) => {
     return true;
   }
 };
+//updates a meal in the database
+let updateMeal = async (meal) => {
+  console.log("product repo: ", meal);
+  //Declare variables
+  let updatedMeal;
+
+  try {
+    //get a database connection and insert SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      //set the name parameters in query
+      // checks for sql injection
+
+      .input("id", sql.Int, meal._id)
+      .input("mealName", sql.NVarChar, meal.meal_name)
+      .input("mealDescription", sql.NVarChar, meal.meal_description)
+      .input("mealPrice", sql.Decimal, meal.meal_price)
+
+      //execute query
+      .query(sqlStatements.SQL_UPDATE);
+    //the newly inserted meal is returned by the query
+    updatedMeal = result.recordset[0];
+  } catch (err) {
+    console.log("DB Error - error updating a meal: ", err.message);
+  }
+  return updatedMeal;
+};
 //exports
 module.exports = {
   getMenu,
   createMeal,
   getMealById,
   deleteMeal,
+  updateMeal,
 };

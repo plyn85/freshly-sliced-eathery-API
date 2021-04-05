@@ -66,5 +66,21 @@ router.delete("/:id", async (req, res) => {
     res.send(err.message);
   }
 });
+
+// PUT update a  meal
+router.put("/", async (req, res) => {
+  // the request body contains the new meal values - copy it
+  const meal = req.body;
+  // show what was copied in the console (server side)
+  console.log("productController update: ", meal);
+
+  try {
+    result = await menuService.updateMeal(meal);
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+    res.send(err.message);
+  }
+});
 // export
 module.exports = router;
