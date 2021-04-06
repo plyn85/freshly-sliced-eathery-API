@@ -5,9 +5,7 @@ const baseValidators = require("./baseValidators.js");
 
 // models
 const Meal = require("../models/meals.js");
-// Validate the body data, sent by the client, for a new product
-// formProduct represents the data filled in a form
-// It needs to be validated before using in the application
+//validation function
 let validateMeal = (formMeal) => {
   // Declare constants and variables
   let validatedMeal;

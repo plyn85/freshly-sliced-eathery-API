@@ -7,6 +7,7 @@ let validateCartItem = (mealDetails, formCartItem, cart) => {
   // Declare constants and variables
   let validatedCartItem;
   let cartItemId = 0;
+  //the cartId field in the cart item will be the same as the current cart id
   let cartId = cart[0]._id;
   //calculate the total for the cart item
   let total = mealDetails.meal_price * formCartItem.quantity;

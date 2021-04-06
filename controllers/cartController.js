@@ -1,9 +1,9 @@
 // Imports
 const router = require("express").Router();
-const menuService = require("../services/menuService");
 const cartService = require("../services/cartService");
 
 const { json } = require("body-parser");
+const { request } = require("express");
 
 //post route will add item to cart if it exists
 // and if it does not it will create a cart and then add an item
@@ -11,11 +11,8 @@ router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
     const cartItem = req.body;
-    const meal_id = req.body._id;
-    //get a single meal by id and match with the meal id from the request body as the paramter
-    const mealDetails = await menuService.getMealById(meal_id);
     //call the menu service pass them the mealDetails and the cartItem
-    const result = await cartService.addItemToCart(mealDetails, cartItem);
+    const result = await cartService.addItemToCart(cartItem);
     //send the json result via http
     res.json(result);
   } catch (err) {
@@ -66,3 +63,16 @@ router.delete("/empty-cart/:id", async (req, res) => {
 });
 // export
 module.exports = router;
+
+//update quantity route
+router.put("/increaseQty/", async (req, res) => {
+  let meal = req.body;
+  //log to the console
+  console.log(meal);
+  try {
+    let result = await cartService.increaseQty(meal);
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+  }
+});
