@@ -89,6 +89,12 @@ let addItemToCart = async (cartItem) => {
 
 let getAllCartItems = async () => {
   const cartItems = await cartRepository.getAllCartItems();
+  //loop through the cartItem and if an items quantity is zero delete it
+  cartItems.forEach((item) => {
+    if (item.quantity <= 0) {
+      cartRepository.deleteCartItem(item._id);
+    }
+  });
   return cartItems;
 };
 
