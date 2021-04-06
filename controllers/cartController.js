@@ -65,7 +65,7 @@ router.delete("/empty-cart/:id", async (req, res) => {
 module.exports = router;
 
 //update quantity route
-router.put("/increaseQty/", async (req, res) => {
+router.put("/increaseQty", async (req, res) => {
   let meal = req.body;
   //log to the console
   console.log(meal);

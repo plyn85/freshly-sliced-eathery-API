@@ -24,6 +24,8 @@ const sqlStatements = {
   SQL_DELETE_CART_ITEM: "DELETE FROM dbo.cartItems WHERE _id = @id;",
   //delete cart by its id
   SQL_DELETE_CART: "DELETE FROM dbo.cart WHERE _id = @id;",
+  SQL_UPDATE_CART_ITEM_QTY:
+    "UPDATE dbo.cartItems SET quantity = @quantity WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
 };
 
 // insert a meal to the db
@@ -80,19 +82,13 @@ let createNewCart = async (cart) => {
 };
 // Get all the cart items
 let getAllCartItems = async () => {
-  // define variable to store the cart
+  // define variable
   let cartItems;
-
-  // Get a DB connection and execute SQL (uses imported database module)
-  // Note await in try/catch block
   try {
     const pool = await dbConnPoolPromise;
     const result = await pool
       .request()
-      // execute the select all query (defined above)
       .query(sqlStatements.SQL_SELECT_ALL_CART_ITEMS);
-
-    // first element of the recordset holds cart
     cartItems = result.recordset[0];
 
     // Catch and log errors to server side console
@@ -185,6 +181,29 @@ let deleteCart = async (cartId) => {
     return true;
   }
 };
+
+//update the of cart Item quantity in the db
+let increaseQty = async (updateQty, mealId) => {
+  //Declare variables
+  let updatedQty;
+  //insert the updated quantity
+  try {
+    //get a database connection and insert SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      .input("id", sql.Int, mealId)
+      .input("quantity", sql.Int, updateQty)
+      .query(sqlStatements.SQL_UPDATE_CART_ITEM_QTY);
+    //the newly inserted product is returned by the query
+    updatedQty = result.recordset[0];
+  } catch (err) {
+    console.log("DB Error - error updating a quantity: ", err.message);
+  }
+  return updatedQty;
+};
+//
+//
 //exports
 module.exports = {
   addItemToCart,
@@ -193,4 +212,5 @@ module.exports = {
   getCart,
   deleteCartItem,
   deleteCart,
+  increaseQty,
 };
