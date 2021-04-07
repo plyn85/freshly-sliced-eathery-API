@@ -61,7 +61,6 @@ let addItemToCart = async (cartItem) => {
 //create a cart
 let createNewCart = async (cart) => {
   //   Declare variables
-  let cartCreated = false;
   let newCart;
   //insert new cart
   try {
@@ -77,12 +76,11 @@ let createNewCart = async (cart) => {
       .query(sqlStatements.SQL_INSERT_NEW_CART);
     //the newly inserted product is returned by the query
     newCart = result.recordset[0];
-    cartCreated = true;
   } catch (err) {
     console.log("DB Error - error inserting a new cart: ", err.message);
   }
 
-  return { newCart, cartCreated };
+  return newCart;
 };
 // Get all the cart items
 let getAllCartItems = async () => {
@@ -208,7 +206,6 @@ let increaseQty = async (updateQty, mealId) => {
 
 //update the subTotal of cart
 let updateCartSubTotal = async (cartId, subTotal) => {
-  console.log(subTotal, cartId, "repo");
   //Declare variables
   let rowsAffected = 0;
   //insert the updated quantity
@@ -221,7 +218,6 @@ let updateCartSubTotal = async (cartId, subTotal) => {
       .input("subTotal", sql.Int, subTotal)
       .query(sqlStatements.SQL_UPDATE_CART_SUB_TOTAL);
     //the newly inserted product is returned by the query
-    console.log(result);
     rowsAffected = Number(result.rowsAffected);
   } catch (err) {
     console.log("DB Error - error updating a subTotal: ", err.message);

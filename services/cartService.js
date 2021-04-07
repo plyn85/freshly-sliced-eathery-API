@@ -4,52 +4,83 @@ const cartItemValidation = require("../validators/cartItemValidation");
 const baseValidators = require("../validators/baseValidators");
 const menuRepository = require("../repositories/menuRepository");
 const Cart = require("../models/cart");
-
+//
 //add a new cart item to the cart
-let addItemToCart = async (cartItem) => {
+let addItemToCart = async (meal) => {
   //constants and variables
   let cart;
-  let cartId;
   let newlyInsertedCartItem;
+  let insertedCartItem;
+  let mealDetails;
   let validatedCartItem;
+  let newCart;
+  let updateCartSubTotal;
+  let newCartCreated = false;
+  let firstCartItemInserted = false;
+  let cartItemInserted = false;
+  let newCartUpdated = false;
+  let cartUpdated = false;
   let cartItemExists = false;
-  //get the id from the incoming request
-  //
-  const meal_id = cartItem._id;
+  let total = 0;
+  let subTotal = 0;
 
-  //get a single meal by id and match with the meal id from the request body as the paramter
-  //
-  const mealDetails = await menuRepository.getMealById(meal_id);
+  mealDetails = await menuRepository.getMealById(meal._id);
+
   //
   // call the cart repo to check if exists
   cart = await cartRepository.getCart();
   //
-  //if the cart does not exist
+  /* if the cart does not exist first a cart will be created 
+     then a cartItem will be created and the FK of the cartItem 
+     will be set to match the PK of the cart. Finally the cart subtotal is updated
+     using the total form the new cartItem 
+  */
   if (cart == null) {
+    console.log("cart does not exist");
     //
-    //create new cart with no zero as values  until item is added
+    //create new cart instance with zero as values  until item is added
     cart = new Cart(0, 0, 0);
 
     //
-    //add to the database
-    let { newCart } = await cartRepository.createNewCart(cart);
-    console.log(newCart);
+    //add new cart to the database
+    newCart = await cartRepository.createNewCart(cart);
+    //if cart is created successfully log to console
+    if (newCart != null) {
+      console.log("New cart created", newCart);
+      newCartCreated = true;
+    } else {
+      console.log("cart was not created");
+    }
     //
-    //now create the cartItem //call the product validator and pass in the meal details and the item quantity and the cart
     //
+    //calculate the total to he passed in cart item validation
+
+    total = mealDetails.meal_price * meal.quantity;
+    //
+    //validate cart item and create instance
     validatedCartItem = cartItemValidation.validateCartItem(
       mealDetails,
-      cartItem,
-      newCart
+      meal,
+      newCart._id,
+      total
     );
     //
     // if the validation is a success
     if (validatedCartItem != null) {
+      //
       // add the cartItem to the db
       newlyInsertedCartItem = await cartRepository.addItemToCart(
         validatedCartItem
       );
+      if (newlyInsertedCartItem != null) {
+        firstCartItemInserted = true;
+        //log newly inserted cartItem
+        console.log(newlyInsertedCartItem, "First cart Item inserted success");
+      } else {
+        console.log("first cartItem not inserted");
+      }
     } else {
+      //
       //validation for cartItem failed
       newlyInsertedCartItem = { error: "invalid cartItem" };
     }
@@ -57,76 +88,115 @@ let addItemToCart = async (cartItem) => {
     //
     //calculate the total
     subTotal = newlyInsertedCartItem.total * newlyInsertedCartItem.quantity;
-    //get the id of new cart that was created
-    cartId = newCart._id;
+    //
+    console.log(subTotal);
+    //and add to the db using the new cart id as the new cartItems FK
     const updateCartSubTotal = await cartRepository.updateCartSubTotal(
-      cartId,
+      newCart._id,
       subTotal
     );
+    if (updateCartSubTotal != null) {
+      newCartUpdated = true;
+      console.log(
+        "cart total update success after first item added:",
+        updateCartSubTotal
+      );
+    } else {
+      console.log("cart update failed");
+    }
+    //if all 3 return true return true back to the cartController
+    if (newCartCreated & firstCartItemInserted && newCartUpdated) {
+      return true;
+    }
   }
-  //if the cart already exists
+  //
+  /* if the cart exists  a cartItem will be created and the FK of the cartItem 
+     will be set to match the PK of the cart. Finally the cart subtotal is updated
+     using the total form the new cartItem 
+  */
   else {
-    //call the cart items
+    console.log("cart exists");
+    //call the cart items repo to check if there are any items
     const cartItems = await cartRepository.getAllCartItems();
+    //
     //check if there any items
     if (cartItems != null) {
-      //loop through the items if there are
+      //
+      //loop through the items
       cartItems.forEach((item) => {
+        //calculate the total of all the items in cart
+        subTotal += item.quantity * item.price;
+
+        //
         //if the item id matches the incoming req body id
         if (item.meal_id == mealDetails._id) {
+          //
           //then the cartItem already exists
+
           cartItemExists = true;
         }
       });
-      console.log(cartItemExists);
     }
     //check if cartItem already exists in cart to prevent adding duplicates
     if (!cartItemExists) {
-      //call the product validator and pass in the meal details and the item quantity and the cart
+      //
+      total = mealDetails.meal_price * meal.quantity;
+      //
+
+      // validate the cart item and create new instance
       validatedCartItem = cartItemValidation.validateCartItem(
         mealDetails,
-        cartItem,
-        cart
+        meal,
+        cartItems[0].cart_id,
+        total
       );
-
+      // if the validation is a success
       if (validatedCartItem != null) {
-        newlyInsertedCartItem = await cartRepository.addItemToCart(
+        //add to the db
+        insertedCartItem = await cartRepository.addItemToCart(
           validatedCartItem
         );
-        //increase the Subtotal in the cart form the newly inserted cartItem
-
-        //calculate the new subTotal
-        let totalSuccessFullyUpdated = false;
-        console.log(subTotal, "+ newSubTotal");
-        let newSubTotal =
-          newlyInsertedCartItem.quantity * newlyInsertedCartItem.price +
-          console.log(
-            newlyInsertedCartItem.quantity,
-            newlyInsertedCartItem.price
-          );
-        //validate the total
-        let validatedTotal = baseValidators.validatePrice(newSubTotal);
-        //if validation returns true
-        if (validatedTotal) {
-          console.log(validatedTotal, "val total");
-          //add it and update the cart
-          totalSuccessFullyUpdated = await cartRepository.updateCartSubTotal(
-            newSubTotal,
-            cart[0]._id
-          );
-          console.log(totalSuccessFullyUpdated);
+        //if the cart item is added to the db
+        if (insertedCartItem != null) {
+          cartItemInserted = true;
+          console.log("cartItem successfully inserted");
         } else {
-          //validation for cartItem failed
-          console.log("new sub total to db failed addItemToCart");
+          console.log("cart item inserted failed");
+        }
+        //if the cart only contains one item change the value of subTotal before being added to db
+        // this is because the second cartItem is added after the original subTotal is calculated above
+        if (cartItems.length == 1) {
+          subTotal = insertedCartItem.total + cartItems[0].total;
+        }
+        //
+        //add the updated cart subTotal and match the FK of the cartItem
+        //with the carts PK
+        updateCartSubTotal = await cartRepository.updateCartSubTotal(
+          insertedCartItem.cart_id,
+          subTotal
+        );
+        //if the cart is updated in the db
+        if (updateCartSubTotal != null) {
+          cartUpdated = true;
+          console.log("cart total update success");
+        } else {
+          console.log("cart updated fail");
         }
       } else {
         //validation for cartItem failed
-        newlyInsertedCartItem = { error: "invalid cartItem" };
+        insertedCartItem = {
+          error: "invalid cartItem or update subTotal",
+        };
       }
-      return newlyInsertedCartItem;
-    } else {
+    }
+    //alert to the console if a duplicate item was added
+    else {
       console.log("cartItem already exists in cart");
     }
+  }
+  //if 2 return true ten return true back to the cartController
+  if (cartItemInserted && cartUpdated) {
+    return true;
   }
 };
 
