@@ -26,6 +26,8 @@ const sqlStatements = {
   SQL_DELETE_CART: "DELETE FROM dbo.cart WHERE _id = @id;",
   SQL_UPDATE_CART_ITEM_QTY:
     "UPDATE dbo.cartItems SET quantity = @quantity WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
+  SQL_UPDATE_CART_SUB_TOTAL:
+    "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
 };
 
 // insert a meal to the db
@@ -60,6 +62,7 @@ let addItemToCart = async (cartItem) => {
 let createNewCart = async (cart) => {
   //   Declare variables
   let cartCreated = false;
+  let newCart;
   //insert new cart
   try {
     //get a database connection and insert SQL
@@ -78,6 +81,7 @@ let createNewCart = async (cart) => {
   } catch (err) {
     console.log("DB Error - error inserting a new cart: ", err.message);
   }
+
   return { newCart, cartCreated };
 };
 // Get all the cart items
@@ -142,7 +146,6 @@ let deleteCartItem = async (cartItemId) => {
       .query(sqlStatements.SQL_DELETE_CART_ITEM);
     //Was the product deleted?
     rowsAffected = Number(result.rowsAffected);
-    console.log(rowsAffected);
   } catch (err) {
     console.log("DB Error - deleteCartItem by id: ", err.message);
   }
@@ -202,6 +205,33 @@ let increaseQty = async (updateQty, mealId) => {
   }
   return updatedQty;
 };
+
+//update the subTotal of cart
+let updateCartSubTotal = async (cartId, subTotal) => {
+  console.log(subTotal, cartId, "repo");
+  //Declare variables
+  let rowsAffected = 0;
+  //insert the updated quantity
+  try {
+    //get a database connection and insert SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      .input("id", sql.Int, cartId)
+      .input("subTotal", sql.Int, subTotal)
+      .query(sqlStatements.SQL_UPDATE_CART_SUB_TOTAL);
+    //the newly inserted product is returned by the query
+    console.log(result);
+    rowsAffected = Number(result.rowsAffected);
+  } catch (err) {
+    console.log("DB Error - error updating a subTotal: ", err.message);
+  }
+  if (rowsAffected === 0) {
+    return false;
+  } else {
+    return true;
+  }
+};
 //
 //
 //exports
@@ -213,4 +243,5 @@ module.exports = {
   deleteCartItem,
   deleteCart,
   increaseQty,
+  updateCartSubTotal,
 };

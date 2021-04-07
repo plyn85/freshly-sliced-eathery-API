@@ -1,55 +1,71 @@
 //imports
 const cartRepository = require("../repositories/cartRepository");
 const cartItemValidation = require("../validators/cartItemValidation");
-const cartValidation = require("../validators/cartValidation");
 const baseValidators = require("../validators/baseValidators");
 const menuRepository = require("../repositories/menuRepository");
+const Cart = require("../models/cart");
 
 //add a new cart item to the cart
 let addItemToCart = async (cartItem) => {
-  console.log(cartItem);
   //constants and variables
-  let newCart;
   let cart;
+  let cartId;
   let newlyInsertedCartItem;
   let validatedCartItem;
   let cartItemExists = false;
   //get the id from the incoming request
+  //
   const meal_id = cartItem._id;
-  console.log(meal_id);
+
   //get a single meal by id and match with the meal id from the request body as the paramter
+  //
   const mealDetails = await menuRepository.getMealById(meal_id);
-  console.log(mealDetails);
-  //calculate the subtotal for the cart
-  let subTotal = mealDetails.meal_price * cartItem.quantity;
-  console.log(subTotal);
-  //call the cart repo to check if a cart exists
+  //
+  // call the cart repo to check if exists
   cart = await cartRepository.getCart();
-  console.log("cart before cart created", cart);
+  //
   //if the cart does not exist
   if (cart == null) {
-    console.log("cart does not exist");
-    //declare variable
-    //call the cart validator and pass in the the subTotal
-    const validatedCart = cartValidation.validateCart(subTotal);
-    console.log(validatedCart);
-    //if the validator validates the cart add to database
-    if (validatedCart != null) {
-      newCart = await cartRepository.createNewCart(validatedCart);
-    } else {
-      //validation for cart failed
-      newCart = { error: "invalid cart or cartItem" };
+    //
+    //create new cart with no zero as values  until item is added
+    cart = new Cart(0, 0, 0);
 
-      //log the result
-      console.log("cartService.createCart(): form validation failed");
+    //
+    //add to the database
+    let { newCart } = await cartRepository.createNewCart(cart);
+    console.log(newCart);
+    //
+    //now create the cartItem //call the product validator and pass in the meal details and the item quantity and the cart
+    //
+    validatedCartItem = cartItemValidation.validateCartItem(
+      mealDetails,
+      cartItem,
+      newCart
+    );
+    //
+    // if the validation is a success
+    if (validatedCartItem != null) {
+      // add the cartItem to the db
+      newlyInsertedCartItem = await cartRepository.addItemToCart(
+        validatedCartItem
+      );
+    } else {
+      //validation for cartItem failed
+      newlyInsertedCartItem = { error: "invalid cartItem" };
     }
-    console.log("New cart successfully created :", newCart);
+    //then update the cart with the new total from the newly inserted cart item
+    //
+    //calculate the total
+    subTotal = newlyInsertedCartItem.total * newlyInsertedCartItem.quantity;
+    //get the id of new cart that was created
+    cartId = newCart._id;
+    const updateCartSubTotal = await cartRepository.updateCartSubTotal(
+      cartId,
+      subTotal
+    );
   }
-  //call the cart repo to check if a cart exists again after cart creation
-  cart = await cartRepository.getCart();
-  console.log("cart after cartCreated", cart);
-  //if the cart exists
-  if (cart != null) {
+  //if the cart already exists
+  else {
     //call the cart items
     const cartItems = await cartRepository.getAllCartItems();
     //check if there any items
@@ -58,6 +74,7 @@ let addItemToCart = async (cartItem) => {
       cartItems.forEach((item) => {
         //if the item id matches the incoming req body id
         if (item.meal_id == mealDetails._id) {
+          //then the cartItem already exists
           cartItemExists = true;
         }
       });
@@ -76,6 +93,32 @@ let addItemToCart = async (cartItem) => {
         newlyInsertedCartItem = await cartRepository.addItemToCart(
           validatedCartItem
         );
+        //increase the Subtotal in the cart form the newly inserted cartItem
+
+        //calculate the new subTotal
+        let totalSuccessFullyUpdated = false;
+        console.log(subTotal, "+ newSubTotal");
+        let newSubTotal =
+          newlyInsertedCartItem.quantity * newlyInsertedCartItem.price +
+          console.log(
+            newlyInsertedCartItem.quantity,
+            newlyInsertedCartItem.price
+          );
+        //validate the total
+        let validatedTotal = baseValidators.validatePrice(newSubTotal);
+        //if validation returns true
+        if (validatedTotal) {
+          console.log(validatedTotal, "val total");
+          //add it and update the cart
+          totalSuccessFullyUpdated = await cartRepository.updateCartSubTotal(
+            newSubTotal,
+            cart[0]._id
+          );
+          console.log(totalSuccessFullyUpdated);
+        } else {
+          //validation for cartItem failed
+          console.log("new sub total to db failed addItemToCart");
+        }
       } else {
         //validation for cartItem failed
         newlyInsertedCartItem = { error: "invalid cartItem" };
@@ -89,13 +132,16 @@ let addItemToCart = async (cartItem) => {
 
 let getAllCartItems = async () => {
   const cartItems = await cartRepository.getAllCartItems();
-  //loop through the cartItem and if an items quantity is zero delete it
-  cartItems.forEach((item) => {
-    if (item.quantity <= 0) {
-      cartRepository.deleteCartItem(item._id);
-    }
-  });
-  return cartItems;
+  //check if there are any cart Items
+  if (cartItems != null) {
+    //loop through the cartItem and if an items quantity is zero delete it
+    cartItems.forEach((item) => {
+      if (item.quantity <= 0) {
+        cartRepository.deleteCartItem(item._id);
+      }
+    });
+    return cartItems;
+  }
 };
 
 //delete a cartItem by id
