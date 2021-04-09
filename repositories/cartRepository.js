@@ -25,7 +25,7 @@ const sqlStatements = {
   //delete cart by its id
   SQL_DELETE_CART: "DELETE FROM dbo.cart WHERE _id = @id;",
   SQL_UPDATE_CART_ITEM_QTY:
-    "UPDATE dbo.cartItems SET quantity = @quantity WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
+    "UPDATE dbo.cartItems SET quantity = @quantity , total = @total WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
   SQL_UPDATE_CART_SUB_TOTAL:
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
 };
@@ -184,9 +184,11 @@ let deleteCart = async (cartId) => {
 };
 
 //update the of cart Item quantity in the db
-let increaseQty = async (updateQty, mealId) => {
+let changeQty = async (updateQty, mealId, total) => {
+  console.log(updateQty, mealId, total);
   //Declare variables
   let updatedQty;
+
   //insert the updated quantity
   try {
     //get a database connection and insert SQL
@@ -195,6 +197,7 @@ let increaseQty = async (updateQty, mealId) => {
       .request()
       .input("id", sql.Int, mealId)
       .input("quantity", sql.Int, updateQty)
+      .input("total", sql.Decimal, total)
       .query(sqlStatements.SQL_UPDATE_CART_ITEM_QTY);
     //the newly inserted product is returned by the query
     updatedQty = result.recordset[0];
@@ -238,6 +241,6 @@ module.exports = {
   getCart,
   deleteCartItem,
   deleteCart,
-  increaseQty,
+  changeQty,
   updateCartSubTotal,
 };

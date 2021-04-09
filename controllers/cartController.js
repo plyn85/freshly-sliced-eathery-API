@@ -68,9 +68,10 @@ module.exports = router;
 router.put("/increaseQty", async (req, res) => {
   let meal = req.body;
   //log to the console
-  console.log(meal);
+
   try {
-    let result = await cartService.increaseQty(meal);
+    let result = await cartService.changeQty(meal);
+    console.log(result);
     res.json(result);
   } catch (err) {
     res.status(500);

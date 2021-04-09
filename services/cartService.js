@@ -32,8 +32,8 @@ let addItemToCart = async (meal) => {
   //
   /* if the cart does not exist first a cart will be created 
      then a cartItem will be created and the FK of the cartItem 
-     will be set to match the PK of the cart. Finally the cart subtotal is updated
      using the total form the new cartItem 
+     will be set to match the PK of the cart. Finally the cart subtotal is updated
   */
   if (cart == null) {
     console.log("cart does not exist");
@@ -204,15 +204,15 @@ let addItemToCart = async (meal) => {
 let getAllCartItems = async () => {
   const cartItems = await cartRepository.getAllCartItems();
   //check if there are any cart Items
-  if (cartItems != null) {
-    //loop through the cartItem and if an items quantity is zero delete it
-    cartItems.forEach((item) => {
-      if (item.quantity <= 0) {
-        cartRepository.deleteCartItem(item._id);
-      }
-    });
-    return cartItems;
-  }
+  // if (cartItems != null) {
+  //   //loop through the cartItem and if an items quantity is zero delete it
+  //   cartItems.forEach((item) => {
+  //     if (item.quantity <= 0) {
+  //       cartRepository.deleteCartItem(item._id);
+  //     }
+  //   });
+  //}
+  return cartItems;
 };
 
 //delete a cartItem by id
@@ -246,33 +246,109 @@ let deleteCart = async (cartId) => {
 };
 
 //increase quantity of cartItem
-let increaseQty = async (meal) => {
-  // variables and const
-  let updatedQtyOfMeal;
+let changeQty = async (meal) => {
+  //constants and variables
+  let total = 0;
+  let subTotal = 0;
+  let mealId = meal.meal_id;
+  let validatedMeal;
+  let quantity = meal.quantity;
+  let cartItemId = 0;
+  let cartId = 0;
+  //validate the meal id and quantity
+  validatedMeal = baseValidators.validatePositiveNumber(mealId);
+  // quantity = baseValidators.validatePositiveNumber(quantity);
 
-  //increase the quantity by one from the request meal body
-  let updateQty = meal.quantity + 1;
-  let mealId = meal._id;
+  // if validation is successful
+  //
+  if (validatedMeal) {
+    console.log("mealid validated");
+    //get meal form db
+    //
+    const mealToUpdate = await menuRepository.getMealById(mealId);
+    //console.log(mealToUpdate);
+    //if the meal is returned from the db
+    //
+    if (mealToUpdate != null) {
+      // console.log("meal from db success :", mealToUpdate);
+      //get the cartItems form the db
+      const cartItems = await cartRepository.getAllCartItems();
+      //if the cart items are returned from the db
+      if (cartItems != null) {
+        //loop through the cartItems
+        //
+        cartItems.forEach((item) => {
+          // matching the meal form the db with cartItem meal from the db
+          if (mealToUpdate._id == item.meal_id) {
+            // console.log(item, mealToUpdate._id, item.meal_id, "meal");
+            //calculate the total to be added to the updated item
+            total = meal.quantity * item.price;
+            //get the id of cart Item
+            cartItemId = item._id;
+          }
+        });
+        //console.log(cartItemId);
+        //update the quantity and the total of cartItem in the db using the cartItems id
+        //
+        const updatedCartItem = await cartRepository.changeQty(
+          quantity,
+          cartItemId,
+          total
+        );
+        //if update returns successfully
+        //
+        if (updatedCartItem != null) {
+          console.log(
+            "cartItem update qty and total success :"
+            // updatedCartItem
+          );
 
-  //validate
-  let validatedQty = baseValidators.validatePositiveNumber(updateQty);
-  let validatedMealId = baseValidators.validateId(mealId);
-
-  // If validation returned  true - save to database
-  if (validatedMealId && validatedQty) {
-    updatedQtyOfMeal = await cartRepository.increaseQty(updateQty, mealId);
+          //
+          //get the cart items after update
+          const cartItems = await cartRepository.getAllCartItems();
+          // console.log("cartItems :", cartItems);
+          //if the cart is successfully returned from db
+          if (cartItems != null) {
+            console.log("cartItems returned success");
+          } else {
+            console.log("cartItems not returned form db");
+          }
+          //
+          // //loop through the cart Items
+          cartItems.forEach((item) => {
+            // if the quantity of an item is zero and the id matches the updated item delete
+            if (item.quantity <= 0 && updatedCartItem._id == item._id) {
+              deleteCartItem(item._id);
+              subTotal = 0;
+            } else {
+              subTotal += item.total;
+              //get the cartId of the items
+              cartId = item.cart_id;
+            }
+          });
+          //then update the cart with the new subTotal
+          let updatedSubTotal = await cartRepository.updateCartSubTotal(
+            cartId,
+            subTotal
+          );
+          //if the updated subTotal returns form db
+          if (updatedSubTotal) {
+            console.log("updated subTotal success", updatedSubTotal);
+            return updatedSubTotal;
+          }
+        }
+      }
+    } else {
+      console.log("meal update failed");
+    }
   } else {
-    // Product data failed validation
-    updatedQtyOfMeal = { error: "Qty update failed" };
+    console.log("meal id or quantity validation fail");
   }
-  // return the newly inserted product
-  return updatedQtyOfMeal;
 };
-
 module.exports = {
   addItemToCart,
   getAllCartItems,
   deleteCartItem,
   deleteCart,
-  increaseQty,
+  changeQty,
 };

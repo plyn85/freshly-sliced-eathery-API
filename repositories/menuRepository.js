@@ -76,7 +76,7 @@ let createMeal = async (meal) => {
 // get a single meal by id
 let getMealById = async (mealId) => {
   let meal;
-  // console.log("repo meal id:", mealId);
+  //console.log("repo meal id:", mealId);
   // returns a single meal with matching id
   try {
     // Get a DB connection and execute SQL
