@@ -236,26 +236,47 @@ let deleteCartItem = async (cartItemId) => {
     }
     //delete cartItem by id
     deleteResult = await cartRepository.deleteCartItem(cartItemId);
-    //get the current cart
-    const cart = await cartRepository.getCart();
-    //if the cart is returned from db
-    if (cart != null) {
-      console.log("cart successfully returned form db", cart[0]);
-      //get the subTotal of the current cart
-      currentCartSubTotal = cart[0].subtotal;
-      //calculate the new subTotal
-      subTotal = currentCartSubTotal - deletedItemPrice;
-      //update the subTotal of the cart passing in cartId and the new subTotal
-      const updatedCart = cartRepository.updateCartSubTotal(
-        cart[0]._id,
-        subTotal
-      );
-      //if the updated subTotal is a success
-      if (updatedCart) {
-        console.log("cart update subTotal success deleteItem");
-      } else {
-        console.log("cart update subTotal fail deleteItem");
+    //if the delete was successful
+    if (deleteResult) {
+      console.log("item was successfully deleted from db");
+
+      //get the current cart
+      const cart = await cartRepository.getCart();
+      //if the cart is returned from db
+      if (cart != null) {
+        console.log("cart successfully returned form db", cart[0]);
+        //get the subTotal of the current cart
+        currentCartSubTotal = cart[0].subtotal;
+        //calculate the new subTotal
+        subTotal = currentCartSubTotal - deletedItemPrice;
+        //update the subTotal of the cart passing in cartId and the new subTotal
+        const updatedCart = cartRepository.updateCartSubTotal(
+          cart[0]._id,
+          subTotal
+        );
+        //if the updated subTotal is a success
+        if (updatedCart) {
+          console.log("cart update subTotal success deleteItem");
+          //get the current cart
+          const cart = await cartRepository.getCart();
+          //check to see if the cart subTotal is zero
+          console.log(cart[0].subtotal);
+          if (cart[0].subtotal <= 0) {
+            //delete the cart if it is
+            const deleteCart = cartRepository.deleteCart(cart[0]._id);
+            //if the cart was deleted
+            if (deleteCart) {
+              console.log("cart deleted");
+            } else {
+              console.log("cart deletion failed");
+            }
+          }
+        } else {
+          console.log("cart update subTotal fail deleteItem");
+        }
       }
+    } else {
+      console.log("item deleted from db failed");
     }
   } else {
     // console.log(deleteResult, "meal service");
