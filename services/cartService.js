@@ -202,30 +202,66 @@ let addItemToCart = async (meal) => {
   }
 };
 let getAllCartItems = async () => {
+  //get cartItems from db
   const cartItems = await cartRepository.getAllCartItems();
-  //check if there are any cart Items
-  // if (cartItems != null) {
-  //   //loop through the cartItem and if an items quantity is zero delete it
-  //   cartItems.forEach((item) => {
-  //     if (item.quantity <= 0) {
-  //       cartRepository.deleteCartItem(item._id);
-  //     }
-  //   });
-  //}
+  //return cartItems
   return cartItems;
 };
 
 //delete a cartItem by id
 let deleteCartItem = async (cartItemId) => {
+  //constants and variables
   let deleteResult = false;
-  //validate the input by call the id function form the base validators
-  if (!baseValidators.validateId(cartItemId)) {
+  let subTotal = 0;
+  let currentCartSubTotal = 0;
+  let deletedItemPrice = 0;
+  //validate the input and if it returns true
+  if (baseValidators.validateId(cartItemId)) {
+    //get the item price before its deleted
+    //first get the cart Items
+    const cartItems = await getAllCartItems();
+    //if the cartItems are returned from db
+    if (cartItems != null) {
+      console.log("cart items returned from db success");
+      //loop through the items
+      cartItems.forEach((item) => {
+        //if the id of the item matches an id in the db
+        if (item._id == cartItemId) {
+          //store the item to be deleted price
+          deletedItemPrice = item.price;
+        }
+      });
+    } else {
+      console.log("cart items returned form db failed");
+    }
+    //delete cartItem by id
+    deleteResult = await cartRepository.deleteCartItem(cartItemId);
+    //get the current cart
+    const cart = await cartRepository.getCart();
+    //if the cart is returned from db
+    if (cart != null) {
+      console.log("cart successfully returned form db", cart[0]);
+      //get the subTotal of the current cart
+      currentCartSubTotal = cart[0].subtotal;
+      //calculate the new subTotal
+      subTotal = currentCartSubTotal - deletedItemPrice;
+      //update the subTotal of the cart passing in cartId and the new subTotal
+      const updatedCart = cartRepository.updateCartSubTotal(
+        cart[0]._id,
+        subTotal
+      );
+      //if the updated subTotal is a success
+      if (updatedCart) {
+        console.log("cart update subTotal success deleteItem");
+      } else {
+        console.log("cart update subTotal fail deleteItem");
+      }
+    }
+  } else {
+    // console.log(deleteResult, "meal service");
     console.log("deleteCartItem service error: invalid id parameter");
     return false;
   }
-  //delete cartItem by id
-  deleteResult = await cartRepository.deleteCartItem(cartItemId);
-  // console.log(deleteResult, "meal service");
 
   return deleteResult;
 };
@@ -240,12 +276,10 @@ let deleteCart = async (cartId) => {
   }
   //delete cart by id
   deleteResult = await cartRepository.deleteCart(cartId);
-  // console.log(deleteResult, "meal service");
-
   return deleteResult;
 };
 
-//increase quantity of cartItem
+//change the quantity of cartItem
 let changeQty = async (meal) => {
   //constants and variables
   let total = 0;
@@ -318,8 +352,13 @@ let changeQty = async (meal) => {
           cartItems.forEach((item) => {
             // if the quantity of an item is zero and the id matches the updated item delete
             if (item.quantity <= 0 && updatedCartItem._id == item._id) {
-              deleteCartItem(item._id);
-              subTotal = 0;
+              const cartItemDeleted = cartRepository.deleteCartItem(item._id);
+              //if the cartItem has beed deleted
+              if (cartItemDeleted) {
+                console.log("cartItem has been deleted changeQty");
+                //change the subTotal to zero
+                subTotal = 0;
+              }
             } else {
               subTotal += item.total;
               //get the cartId of the items
