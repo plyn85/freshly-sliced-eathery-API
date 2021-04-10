@@ -5,7 +5,7 @@ const validator = require("validator");
 // needs to be validated before using in the application
 let validateCartItem = (mealDetails, meal, cartId, total) => {
   //
-
+  //console.log("meal deat", mealDetails.meal_description);
   // Declare constants and variables
   //
   let validatedCartItem;
@@ -22,6 +22,7 @@ let validateCartItem = (mealDetails, meal, cartId, total) => {
     baseValidators.validateId(cartId) &&
     baseValidators.validateId(mealDetails._id) &&
     !validator.isEmpty(mealDetails.meal_name) &&
+    !validator.isEmpty(mealDetails.meal_description) &&
     baseValidators.validatePositiveNumber(meal.quantity) &&
     baseValidators.validatePrice(mealDetails.meal_price) &&
     baseValidators.validatePrice(total)
@@ -34,6 +35,7 @@ let validateCartItem = (mealDetails, meal, cartId, total) => {
       cartId,
       mealDetails._id,
       validator.escape(mealDetails.meal_name),
+      validator.escape(mealDetails.meal_description),
       meal.quantity,
       mealDetails.meal_price,
       total

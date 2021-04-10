@@ -13,7 +13,7 @@ const sqlStatements = {
     "SELECT * FROM dbo.cart ORDER BY _id ASC for json path;",
   // insert a meal to db
   SQL_INSERT:
-    "INSERT INTO dbo.cartItems (cart_id,meal_id,meal_name,quantity,price,total) VALUES (@cartId,@mealId,@mealName,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.cartItems (cart_id,meal_id,meal_name,meal_description,quantity,price,total) VALUES (@cartId,@mealId,@mealName,@mealDescription,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
   //create a new cart in the db
   SQL_INSERT_NEW_CART:
     "INSERT INTO dbo.cart (user_id,subtotal) VALUES (@userId,@subTotal) SELECT * from dbo.cart WHERE _id = SCOPE_IDENTITY();",
@@ -32,6 +32,7 @@ const sqlStatements = {
 
 // insert a meal to the db
 let addItemToCart = async (cartItem) => {
+  //console.log("cartItems", cartItem);
   //   Declare variables
   let insertedCartItem;
   //insert new cartItem
@@ -45,6 +46,7 @@ let addItemToCart = async (cartItem) => {
       .input("cartId", sql.Int, cartItem.cart_id)
       .input("mealId", sql.Int, cartItem.meal_id)
       .input("mealName", sql.NVarChar, cartItem.meal_name)
+      .input("mealDescription", sql.NVarChar, cartItem.meal_description)
       .input("cartItemQuantity", sql.Int, cartItem.quantity)
       .input("cartItemPrice", sql.Decimal, cartItem.price)
       .input("cartItemTotal", sql.Decimal, cartItem.total)

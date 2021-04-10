@@ -11,7 +11,7 @@ let addItemToCart = async (meal) => {
   let cart;
   let newlyInsertedCartItem;
   let insertedCartItem;
-  let mealDetails;
+  //let mealDetails;
   let validatedCartItem;
   let newCart;
   let updateCartSubTotal;
@@ -24,8 +24,8 @@ let addItemToCart = async (meal) => {
   let total = 0;
   let subTotal = 0;
 
-  mealDetails = await menuRepository.getMealById(meal._id);
-
+  const mealDetails = await menuRepository.getMealById(meal._id);
+  //console.log("meal details", mealDetails);
   //
   // call the cart repo to check if exists
   cart = await cartRepository.getCart();
@@ -154,6 +154,7 @@ let addItemToCart = async (meal) => {
             console.log("cart item inserted failed");
           }
           // //calculate the subTotal by loop through the items
+
           cartItems.forEach((item) => {
             //if cart only has one item just add the total to the subTotal
             if (cartItems.length == 1) {
@@ -162,7 +163,7 @@ let addItemToCart = async (meal) => {
             //if it has more than one item loop through them calculate the total and add
             // to the subTotal
             else {
-              subTotal += item.quantity * item.total;
+              subTotal += item.quantity * item.price;
             }
           });
           //when loop is finished add the newly inserted cartItem total to
@@ -223,10 +224,10 @@ let deleteCartItem = async (cartItemId) => {
     console.log("cartItems :", cartItems);
     //if the cartItems are returned from db
     if (cartItems != null) {
-      console.log("cart items returned from db success");
+      //  console.log("cart items returned from db success");
       //loop through the items
       cartItems.forEach((item) => {
-        console.log("item total : ", item.total);
+        // console.log("item total : ", item.total);
         //if the id of the item matches an id in the db
         if (item._id == cartItemId) {
           //store the item to be deleted price
@@ -249,10 +250,10 @@ let deleteCartItem = async (cartItemId) => {
         console.log("cart successfully returned form db", cart[0]);
         //get the subTotal of the current cart
         currentCartSubTotal = cart[0].subtotal;
-        console.log("del item price", deletedItemPrice);
+        // console.log("del item price", deletedItemPrice);
         //calculate the new subTotal
         subTotal = currentCartSubTotal - deletedItemPrice;
-        console.log("subtotal", subTotal);
+        // console.log("subtotal", subTotal);
         //update the subTotal of the cart passing in cartId and the new subTotal
         const updatedCart = await cartRepository.updateCartSubTotal(
           cart[0]._id,
