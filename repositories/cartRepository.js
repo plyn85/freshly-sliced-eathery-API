@@ -209,6 +209,7 @@ let changeQty = async (updateQty, mealId, total) => {
 
 //update the subTotal of cart
 let updateCartSubTotal = async (cartId, subTotal) => {
+  console.log("subTotal repo", subTotal);
   //Declare variables
   let rowsAffected = 0;
   //insert the updated quantity

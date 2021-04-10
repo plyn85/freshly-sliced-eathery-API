@@ -376,34 +376,61 @@ let changeQty = async (meal) => {
           } else {
             console.log("cartItems not returned form db");
           }
-          let itemPrice = 0;
+
           //
           // //loop through the cart Items
-          cartItems.forEach((item) => {
+          for (let i = 0; i < cartItems.length; i++) {
+            // console.log(cartItems[i]);
+            //constants and variables
+            let item = cartItems[i];
+            let itemTotal = item.total;
             // if the quantity of an item is zero and the id matches the updated item delete
             if (item.quantity <= 0 && updatedCartItem._id == item._id) {
-              const cartItemDeleted = cartRepository.deleteCartItem(item._id);
+              const cartItemDeleted = await cartRepository.deleteCartItem(
+                item._id
+              );
               //if the cartItem has beed deleted
               if (cartItemDeleted) {
                 console.log("cartItem has been deleted changeQty");
-                //change the subTotal to zero
-                subTotal = 0;
+                //delete the item total form before it was deleted form subTotal;
+                subTotal -= itemTotal;
               }
             } else {
               subTotal += item.total;
               //get the cartId of the items
               cartId = item.cart_id;
             }
-          });
-          //then update the cart with the new subTotal
-          let updatedSubTotal = await cartRepository.updateCartSubTotal(
-            cartId,
-            subTotal
+          }
+
+          console.log(
+            "subTotal",
+            subTotal,
+            "cart id :",
+            updatedCartItem.cart_id
           );
-          //if the updated subTotal returns form db
-          if (updatedSubTotal) {
-            console.log("updated subTotal success", updatedSubTotal);
-            return updatedSubTotal;
+          //if the subtotal is zero delete the cart
+          if (subTotal == 0) {
+            //delete cart
+            const deleteCart = await cartRepository.deleteCart(
+              updatedCartItem.cart_id
+            );
+            //if cart is deleted
+            if (deleteCart) {
+              console.log("delete cart :", deleteCart);
+            } else {
+              console.log("cart delete fail :", deleteCart);
+            }
+          } else {
+            //then update the cart with the new subTotal
+            let updatedSubTotal = await cartRepository.updateCartSubTotal(
+              cartId,
+              subTotal
+            );
+            //if the updated subTotal returns form db
+            if (updatedSubTotal) {
+              console.log("updated subTotal success", updatedSubTotal);
+              return updatedSubTotal;
+            }
           }
         }
       } else {
