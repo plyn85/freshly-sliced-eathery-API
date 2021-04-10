@@ -220,15 +220,17 @@ let deleteCartItem = async (cartItemId) => {
     //get the item price before its deleted
     //first get the cart Items
     const cartItems = await getAllCartItems();
+    console.log("cartItems :", cartItems);
     //if the cartItems are returned from db
     if (cartItems != null) {
       console.log("cart items returned from db success");
       //loop through the items
       cartItems.forEach((item) => {
+        console.log("item total : ", item.total);
         //if the id of the item matches an id in the db
         if (item._id == cartItemId) {
           //store the item to be deleted price
-          deletedItemPrice = item.price;
+          deletedItemPrice = item.total;
         }
       });
     } else {
@@ -247,16 +249,18 @@ let deleteCartItem = async (cartItemId) => {
         console.log("cart successfully returned form db", cart[0]);
         //get the subTotal of the current cart
         currentCartSubTotal = cart[0].subtotal;
+        console.log("del item price", deletedItemPrice);
         //calculate the new subTotal
         subTotal = currentCartSubTotal - deletedItemPrice;
+        console.log("subtotal", subTotal);
         //update the subTotal of the cart passing in cartId and the new subTotal
-        const updatedCart = cartRepository.updateCartSubTotal(
+        const updatedCart = await cartRepository.updateCartSubTotal(
           cart[0]._id,
           subTotal
         );
         //if the updated subTotal is a success
         if (updatedCart) {
-          console.log("cart update subTotal success deleteItem");
+          console.log("cart update subTotal success deleteItem", updatedCart);
           //get the current cart
           const cart = await cartRepository.getCart();
           //check to see if the cart subTotal is zero
@@ -325,14 +329,16 @@ let changeQty = async (meal) => {
     //if the meal is returned from the db
     //
     if (mealToUpdate != null) {
-      // console.log("meal from db success :", mealToUpdate);
+      //console.log("meal from db success :", mealToUpdate);
       //get the cartItems form the db
       const cartItems = await cartRepository.getAllCartItems();
       //if the cart items are returned from the db
       if (cartItems != null) {
+        //console.log("cart from db success :", cartItems);
         //loop through the cartItems
         //
         cartItems.forEach((item) => {
+          //console.log("item :", item);
           // matching the meal form the db with cartItem meal from the db
           if (mealToUpdate._id == item.meal_id) {
             // console.log(item, mealToUpdate._id, item.meal_id, "meal");
@@ -340,6 +346,8 @@ let changeQty = async (meal) => {
             total = meal.quantity * item.price;
             //get the id of cart Item
             cartItemId = item._id;
+          } else {
+            console.log("meal does not match with meal from cartItems");
           }
         });
         //console.log(cartItemId);
@@ -368,6 +376,7 @@ let changeQty = async (meal) => {
           } else {
             console.log("cartItems not returned form db");
           }
+          let itemPrice = 0;
           //
           // //loop through the cart Items
           cartItems.forEach((item) => {
@@ -397,9 +406,11 @@ let changeQty = async (meal) => {
             return updatedSubTotal;
           }
         }
+      } else {
+        console.log("cartItems returned form db fail");
       }
     } else {
-      console.log("meal update failed");
+      console.log("meal returned form db failed");
     }
   } else {
     console.log("meal id or quantity validation fail");
