@@ -7,6 +7,7 @@ const Cart = require("../models/cart");
 //
 //add a new cart item to the cart
 let addItemToCart = async (meal) => {
+  console.log(meal);
   //constants and variables
   let cart;
   let newlyInsertedCartItem;
@@ -202,9 +203,17 @@ let addItemToCart = async (meal) => {
     }
   }
 };
+// to get all cartItems
 let getAllCartItems = async () => {
   //get cartItems from db
   const cartItems = await cartRepository.getAllCartItems();
+  //return cartItems
+  return cartItems;
+};
+// to get all cart
+let getCart = async () => {
+  //get cartItems from db
+  const cartItems = await cartRepository.getCart();
   //return cartItems
   return cartItems;
 };
@@ -450,4 +459,5 @@ module.exports = {
   deleteCartItem,
   deleteCart,
   changeQty,
+  getCart,
 };

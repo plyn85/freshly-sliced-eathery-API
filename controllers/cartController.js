@@ -11,6 +11,7 @@ router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
     const cartItem = req.body;
+    console.log(cartItem);
     //call the menu service pass them the mealDetails and the cartItem
     const result = await cartService.addItemToCart(cartItem);
     //send the json result via http
@@ -24,6 +25,15 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const result = await cartService.getAllCartItems();
+    res.json(result);
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+//route to get all cart
+router.get("/get-cart", async (req, res) => {
+  try {
+    const result = await cartService.getCart();
     res.json(result);
   } catch (err) {
     res.send(err.message);
