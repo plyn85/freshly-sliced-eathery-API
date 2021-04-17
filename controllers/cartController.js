@@ -5,8 +5,7 @@ const cartService = require("../services/cartService");
 const { json } = require("body-parser");
 const { request } = require("express");
 
-//post route will add item to cart if it exists
-// and if it does not it will create a cart and then add an item
+// add an item to the cart
 router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
@@ -77,6 +76,7 @@ module.exports = router;
 //update quantity route
 router.put("/increaseQty", async (req, res) => {
   let meal = req.body;
+  console.log(meal);
   //log to the console
 
   try {

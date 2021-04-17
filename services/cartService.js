@@ -125,7 +125,9 @@ let addItemToCart = async (meal) => {
       //
       //loop trough the cart items returning true if the cartItems id matched the mealDetails id
       cartItems.forEach((item) => {
-        if (item.meal_id == mealDetails._id) cartItemExists = true;
+        if (item.meal_id == mealDetails._id) {
+          cartItemExists = true;
+        }
       });
 
       //if the cartItem does not already exist prevents adding duplicates
@@ -195,9 +197,12 @@ let addItemToCart = async (meal) => {
       //alert to the console if a duplicate item was added
       else {
         console.log("cartItem already exists in cart");
+        //if cartItem does not exists  return cartItemsExists variable
+        //which and set to false
+        return !cartItemExists;
       }
     }
-    //if 2 return true ten return true back to the cartController
+    //if 2 return true then return true back to the cartController
     if (cartItemInserted && cartUpdated) {
       return true;
     }
@@ -319,12 +324,13 @@ let changeQty = async (meal) => {
   //constants and variables
   let total = 0;
   let subTotal = 0;
-  let mealId = meal.meal_id;
+  let mealId = meal._id;
   let validatedMeal;
   let quantity = meal.quantity;
   let cartItemId = 0;
   let cartId = 0;
   //validate the meal id and quantity
+  console.log("meal id", mealId);
   validatedMeal = baseValidators.validatePositiveNumber(mealId);
   // quantity = baseValidators.validatePositiveNumber(quantity);
 

@@ -71,8 +71,9 @@ router.delete("/:id", async (req, res) => {
 router.put("/", async (req, res) => {
   // the request body contains the new meal values - copy it
   const meal = req.body;
+  console.log(meal);
   // show what was copied in the console (server side)
-  console.log("productController update: ", meal);
+  console.log("mealController update: ", meal);
 
   try {
     result = await menuService.updateMeal(meal);
