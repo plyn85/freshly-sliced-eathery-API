@@ -3,7 +3,11 @@ const cartRepository = require("../repositories/cartRepository");
 const cartItemValidation = require("../validators/cartItemValidation");
 const baseValidators = require("../validators/baseValidators");
 const menuRepository = require("../repositories/menuRepository");
+
 const Cart = require("../models/cart");
+//stripe secret key
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 //
 //add a new cart item to the cart
 let addItemToCart = async (meal) => {
@@ -459,6 +463,32 @@ let changeQty = async (meal) => {
     console.log("meal id or quantity validation fail");
   }
 };
+
+//function to handle order stripe payment and order
+let stripeHandlePayment = async (stripeBody) => {
+  console.log(stripeBody.card.name);
+  try {
+    const customer = await stripe.customers.create({
+      description: "My new customer",
+      name: stripeBody.card.name,
+      source: stripeBody.id,
+      email: stripeBody.email,
+    });
+    console.log(customer);
+    // console.log("custmers", customer.id);
+    // const charge = await stripe.charges.create({
+    //   amount: 2000,
+    //   currency: "eur",
+    //   source: stripeBody.id,
+    //   description: "My First Test Charge (created for API docs)",
+    // });
+    // console.log(charge);
+  } catch (err) {
+    res.send(err);
+  }
+  //console.log(customers);
+};
+
 module.exports = {
   addItemToCart,
   getAllCartItems,
@@ -466,4 +496,5 @@ module.exports = {
   deleteCart,
   changeQty,
   getCart,
+  stripeHandlePayment,
 };

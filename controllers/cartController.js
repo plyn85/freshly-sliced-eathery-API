@@ -70,8 +70,6 @@ router.delete("/empty-cart/:id", async (req, res) => {
     res.send(err.message);
   }
 });
-// export
-module.exports = router;
 
 //update quantity route
 router.put("/increaseQty", async (req, res) => {
@@ -87,3 +85,19 @@ router.put("/increaseQty", async (req, res) => {
     res.status(500);
   }
 });
+
+//to handle stripe payments
+router.post("/payment", async (req, res) => {
+  let stripeBody = req.body;
+  console.log("stripeBody", stripeBody);
+  try {
+    let result = await cartService.stripeHandlePayment(stripeBody);
+    console.log(result);
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+  }
+});
+
+//export
+module.exports = router;

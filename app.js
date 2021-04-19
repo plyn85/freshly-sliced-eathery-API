@@ -1,3 +1,7 @@
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 // require imports packages required by the application
 const express = require("express");
 const cors = require("cors");
