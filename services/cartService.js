@@ -109,9 +109,14 @@ let addItemToCart = async (meal) => {
     } else {
       console.log("cart update failed");
     }
-    //if all 3 return true return true back to the cartController
+    //if all 3 return true return cart id back to the cartController
     if (newCartCreated & firstCartItemInserted && newCartUpdated) {
-      return true;
+      //query the db for the new cart
+      const newCart = await cartRepository.getCart();
+      //get the cart Id
+      let cartId = newCart[0]._id;
+      //return to front end of application
+      return cartId;
     }
   }
   //
@@ -422,12 +427,6 @@ let changeQty = async (meal) => {
             }
           }
 
-          console.log(
-            "subTotal",
-            subTotal,
-            "cart id :",
-            updatedCartItem.cart_id
-          );
           //if the subtotal is zero delete the cart
           if (subTotal == 0) {
             //delete cart
@@ -465,28 +464,44 @@ let changeQty = async (meal) => {
 };
 
 //function to handle order stripe payment and order
-let stripeHandlePayment = async (stripeBody) => {
-  console.log(stripeBody.card.name);
-  try {
-    const customer = await stripe.customers.create({
-      description: "My new customer",
-      name: stripeBody.card.name,
-      source: stripeBody.id,
-      email: stripeBody.email,
-    });
-    console.log(customer);
-    // console.log("custmers", customer.id);
-    // const charge = await stripe.charges.create({
-    //   amount: 2000,
-    //   currency: "eur",
-    //   source: stripeBody.id,
-    //   description: "My First Test Charge (created for API docs)",
-    // });
-    // console.log(charge);
-  } catch (err) {
-    res.send(err);
+let stripeHandlePayment = async (stripeBody, cartId) => {
+  //query the be form the cart
+  let cart = await cartRepository.getCart();
+  // console.log("stipe body", stripeBody);
+  //validate the id form request body
+  let validatedId = baseValidators.validatePositiveNumber(cartId);
+
+  //if it returns true and the cart id from the request body matches
+  // the cart id form the db
+  if (validatedId && cartId == cart[0]._id) {
+    //add the customer info and payment to stripe
+    try {
+      const customer = await stripe.customers.create({
+        description: stripeBody.card.id,
+        name: stripeBody.card.name,
+        source: stripeBody.id,
+        email: stripeBody.email,
+      });
+      // console.log("customer", customer);
+      const charge = await stripe.charges.create({
+        //passing in the current card subtotal as the amount
+        amount: cart[0].subtotal * 100,
+        currency: "eur",
+        source: "tok_mastercard",
+        description: customer.id,
+      });
+      // if (customer != null && charge != null) {
+      //   console.log(charge);
+      //   console.log("returned succesfully");
+      // } else {
+      //   console.log("not succesfully");
+      // }
+    } catch (err) {
+      res.send(err);
+    }
+  } else {
+    console.log("cart validation failed or cart ids do not match");
   }
-  //console.log(customers);
 };
 
 module.exports = {

@@ -74,7 +74,7 @@ router.delete("/empty-cart/:id", async (req, res) => {
 //update quantity route
 router.put("/increaseQty", async (req, res) => {
   let meal = req.body;
-  console.log(meal);
+  console.log(req.params.id);
   //log to the console
 
   try {
@@ -87,11 +87,12 @@ router.put("/increaseQty", async (req, res) => {
 });
 
 //to handle stripe payments
-router.post("/payment", async (req, res) => {
+router.post("/payment/:id", async (req, res) => {
+  //get stipe body and cart id from the request body
   let stripeBody = req.body;
-  console.log("stripeBody", stripeBody);
+  let cartId = req.params.id;
   try {
-    let result = await cartService.stripeHandlePayment(stripeBody);
+    let result = await cartService.stripeHandlePayment(stripeBody, cartId);
     console.log(result);
     res.json(result);
   } catch (err) {
