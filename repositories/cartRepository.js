@@ -28,6 +28,8 @@ const sqlStatements = {
     "UPDATE dbo.cartItems SET quantity = @quantity , total = @total WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
   SQL_UPDATE_CART_SUB_TOTAL:
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
+  SQL_INSERT_ORDER:
+    "INSERT INTO dbo.orders (collection_time,message) VALUES (@collectionTime,@message) SELECT * from dbo.orderS WHERE _id = SCOPE_IDENTITY();",
 };
 
 // insert a meal to the db
@@ -234,6 +236,30 @@ let updateCartSubTotal = async (cartId, subTotal) => {
     return true;
   }
 };
+
+//create an order in db
+let createOrder = async (collectionData) => {
+  //   Declare variables
+  let orderData;
+  //insert new order
+  try {
+    //get a database connection and insert SQL
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      //set the name parameters in query
+      // checks for sql injection
+      .input("collectionTime", sql.NVarChar, collectionData.collectionTime)
+      .input("message", sql.NVarChar, collectionData.message)
+      //execute query
+      .query(sqlStatements.SQL_INSERT_ORDER);
+    //the newly inserted order is returned by the query
+    orderData = result.recordset[0];
+  } catch (err) {
+    console.log("DB Error - error inserting a new order: ", err.message);
+  }
+  return orderData;
+};
 //
 //
 //exports
@@ -246,4 +272,5 @@ module.exports = {
   deleteCart,
   changeQty,
   updateCartSubTotal,
+  createOrder,
 };

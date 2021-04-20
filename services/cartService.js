@@ -3,8 +3,10 @@ const cartRepository = require("../repositories/cartRepository");
 const cartItemValidation = require("../validators/cartItemValidation");
 const baseValidators = require("../validators/baseValidators");
 const menuRepository = require("../repositories/menuRepository");
+const validator = require("validator");
 
 const Cart = require("../models/cart");
+const { DateTime } = require("mssql");
 //stripe secret key
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -503,7 +505,34 @@ let stripeHandlePayment = async (stripeBody, cartId) => {
     console.log("cart validation failed or cart ids do not match");
   }
 };
+//function to handle the collection data
+let collectionData = async (collectionData) => {
+  //constants and variables
+  let validatedCollectionData;
+  console.log(collectionData);
+  //get the collection Data
+  let collectionTime = collectionData.collectionTimeMenu;
+  let message = collectionData.message;
 
+  //validate the data
+  if (!validator.isEmpty(collectionTime) && !validator.isEmpty(message)) {
+    console.log(collectionTime, message);
+    //if it passes create the object
+    validatedCollectionData = collectionData = {
+      collectionTime: validator.escape(collectionTime),
+      message: validator.escape(message),
+    };
+    //pass to repository to add to db
+    validatedCollectionData = await cartRepository.createOrder(
+      validatedCollectionData
+    );
+  }
+
+  //return the object
+  return validatedCollectionDataStore;
+};
+
+//exports
 module.exports = {
   addItemToCart,
   getAllCartItems,
@@ -512,4 +541,5 @@ module.exports = {
   changeQty,
   getCart,
   stripeHandlePayment,
+  collectionData,
 };

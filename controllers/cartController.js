@@ -100,5 +100,17 @@ router.post("/payment/:id", async (req, res) => {
   }
 });
 
+//to handle collection info
+router.post("/collection", async (req, res) => {
+  //sending the request body to collection function
+  try {
+    let result = await cartService.collectionData(req.body);
+    console.log(result);
+    //res.json(result);
+  } catch (err) {
+    res.status(500);
+  }
+});
+
 //export
 module.exports = router;
