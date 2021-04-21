@@ -1,6 +1,7 @@
 //imports
 const cartRepository = require("../repositories/cartRepository");
 const cartItemValidation = require("../validators/cartItemValidation");
+const customerValidation = require("../validators/customerValidation");
 const baseValidators = require("../validators/baseValidators");
 const menuRepository = require("../repositories/menuRepository");
 const validator = require("validator");
@@ -117,7 +118,7 @@ let addItemToCart = async (meal) => {
       const newCart = await cartRepository.getCart();
       //get the cart Id
       let cartId = newCart[0]._id;
-      //return to front end of application
+      //return the cart to front end of application
       return cartId;
     }
   }
@@ -518,31 +519,22 @@ let stripeHandlePayment = async (stripeBody, cartId) => {
   return customerData;
 };
 //function to handle the collection data
-let collectionData = async (collectionData) => {
+let createCustomer = async (customer) => {
   //constants and variables
-  let validatedCollectionData;
-  console.log(collectionData);
-  //get the collection Data
-  let collectionTime = collectionData.collectionTimeMenu;
-  let message = collectionData.message;
+  let validatedCustomer;
 
-  //validate the data
-  if (!validator.isEmpty(collectionTime) && !validator.isEmpty(message)) {
-    console.log(collectionTime, message);
-    //if it passes create the object
-    validatedCollectionData = collectionData = {
-      collectionTime: validator.escape(collectionTime),
-      message: validator.escape(message),
-    };
+  //validate customer and create instance
+  let validateCustomer = customerValidation.validateCustomer(customer);
+
+  //
+  // if the validation is a success
+  if (validateCustomer != null) {
     //pass to repository to add to db
-    validatedCollectionData = await cartRepository.createOrder(
-      validatedCollectionData
-    );
+    validatedCustomer = await cartRepository.createCustomer(validateCustomer);
   }
-
   //and
   //return the object
-  return validatedCollectionData;
+  return validateCustomer;
 };
 
 //exports
@@ -554,5 +546,5 @@ module.exports = {
   changeQty,
   getCart,
   stripeHandlePayment,
-  collectionData,
+  createCustomer,
 };

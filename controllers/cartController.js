@@ -102,10 +102,13 @@ router.post("/payment/:id", async (req, res) => {
 
 //to handle collection info
 router.post("/collection", async (req, res) => {
+  //getting the body of the request
+  let customerData = req.body;
+  console.log(customerData);
   //sending the request body to collection function
   try {
-    let result = await cartService.collectionData(req.body);
-    console.log("collection order", result);
+    let result = await cartService.createCustomer(customerData);
+    console.log("collection order", result._id);
     res.json(result);
   } catch (err) {
     res.status(500);

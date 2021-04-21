@@ -28,8 +28,8 @@ const sqlStatements = {
     "UPDATE dbo.cartItems SET quantity = @quantity , total = @total WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
   SQL_UPDATE_CART_SUB_TOTAL:
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
-  SQL_INSERT_ORDER:
-    "INSERT INTO dbo.orders (collection_time,message) VALUES (@collectionTime,@message) SELECT * from dbo.orderS WHERE _id = SCOPE_IDENTITY();",
+  SQL_INSERT_CUSTOMER:
+    "INSERT INTO dbo.customer (name,email,message,collection_time) VALUES (@name,@email,@collectionTime,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
 };
 
 // insert a meal to the db
@@ -238,10 +238,11 @@ let updateCartSubTotal = async (cartId, subTotal) => {
 };
 
 //create an order in db
-let createOrder = async (collectionData) => {
+let createCustomer = async (customerData) => {
+  console.log(customerData);
   //   Declare variables
-  let orderData;
-  //insert new order
+  let customer;
+  //insert new customer
   try {
     //get a database connection and insert SQL
     const pool = await dbConnPoolPromise;
@@ -249,17 +250,19 @@ let createOrder = async (collectionData) => {
       .request()
       //set the name parameters in query
       // checks for sql injection
-      .input("collectionTime", sql.NVarChar, collectionData.collectionTime)
-      .input("message", sql.NVarChar, collectionData.message)
+      .input("name", sql.NVarChar, customerData.name)
+      .input("email", sql.NVarChar, customerData.email)
+      .input("message", sql.NVarChar, customerData.message)
+      .input("collectionTime", sql.NVarChar, customerData.collection_time)
       //execute query
-      .query(sqlStatements.SQL_INSERT_ORDER);
+      .query(sqlStatements.SQL_INSERT_CUSTOMER);
     //the newly inserted order is returned by the query
-    orderData = result.recordset[0];
-    console.log(orderData);
+    customer = result.recordset[0];
+    console.log(customer);
   } catch (err) {
     console.log("DB Error - error inserting a new order: ", err.message);
   }
-  return orderData;
+  return customer;
 };
 //
 //
@@ -273,5 +276,5 @@ module.exports = {
   deleteCart,
   changeQty,
   updateCartSubTotal,
-  createOrder,
+  createCustomer,
 };
