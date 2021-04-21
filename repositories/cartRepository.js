@@ -255,6 +255,7 @@ let createOrder = async (collectionData) => {
       .query(sqlStatements.SQL_INSERT_ORDER);
     //the newly inserted order is returned by the query
     orderData = result.recordset[0];
+    console.log(orderData);
   } catch (err) {
     console.log("DB Error - error inserting a new order: ", err.message);
   }

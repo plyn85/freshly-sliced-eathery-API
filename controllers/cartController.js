@@ -105,8 +105,8 @@ router.post("/collection", async (req, res) => {
   //sending the request body to collection function
   try {
     let result = await cartService.collectionData(req.body);
-    console.log(result);
-    //res.json(result);
+    console.log("collection order", result);
+    res.json(result);
   } catch (err) {
     res.status(500);
   }

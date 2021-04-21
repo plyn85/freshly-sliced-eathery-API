@@ -467,6 +467,8 @@ let changeQty = async (meal) => {
 
 //function to handle order stripe payment and order
 let stripeHandlePayment = async (stripeBody, cartId) => {
+  //constants and variables
+  let customerData;
   //query the be form the cart
   let cart = await cartRepository.getCart();
   // console.log("stipe body", stripeBody);
@@ -484,7 +486,7 @@ let stripeHandlePayment = async (stripeBody, cartId) => {
         source: stripeBody.id,
         email: stripeBody.email,
       });
-      // console.log("customer", customer);
+      //add the charge info to stripe
       const charge = await stripe.charges.create({
         //passing in the current card subtotal as the amount
         amount: cart[0].subtotal * 100,
@@ -492,18 +494,28 @@ let stripeHandlePayment = async (stripeBody, cartId) => {
         source: "tok_mastercard",
         description: customer.id,
       });
-      // if (customer != null && charge != null) {
-      //   console.log(charge);
-      //   console.log("returned succesfully");
-      // } else {
-      //   console.log("not succesfully");
-      // }
+      //if the customer and charge where added to stipe
+      if (customer != null && charge != null) {
+        // console.log("charge", charge);
+        // console.log("custmer", customer);
+        //build on object with the customer info to send back to front end
+        customerData = {
+          amount: charge.amount,
+          email: customer.email,
+          invoice_prefix: customer.invoice_prefix,
+          name: customer.name,
+        };
+        console.log(customerData);
+      } else {
+        console.log("not succesfully");
+      }
     } catch (err) {
       res.send(err);
     }
   } else {
     console.log("cart validation failed or cart ids do not match");
   }
+  return customerData;
 };
 //function to handle the collection data
 let collectionData = async (collectionData) => {
@@ -528,8 +540,9 @@ let collectionData = async (collectionData) => {
     );
   }
 
+  //and
   //return the object
-  return validatedCollectionDataStore;
+  return validatedCollectionData;
 };
 
 //exports
