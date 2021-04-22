@@ -23,7 +23,7 @@ let validateCustomer = (customerData) => {
   }
   if (
     !validator.isEmpty(name) &&
-    !validator.isEmpty(email) &&
+    validator.isEmail(email) &&
     !validator.isEmpty(collectionTime) &&
     !validator.isEmpty(message)
   ) {

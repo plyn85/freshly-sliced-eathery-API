@@ -9,8 +9,8 @@ const sqlStatements = {
   SQL_SELECT_ALL_CART_ITEMS:
     "SELECT * FROM dbo.cartItems ORDER BY _id ASC for json path;",
   //select all from the cart
-  SQL_SELECT_ALL_FROM_CART:
-    "SELECT * FROM dbo.cart ORDER BY _id ASC for json path;",
+  SQL_CART_BY_USER_ID:
+    "SELECT * FROM dbo.cart WHERE user_id  = @user_id for json path, without_array_wrapper;",
   // insert a meal to db
   SQL_INSERT:
     "INSERT INTO dbo.cartItems (cart_id,meal_id,meal_name,meal_description,quantity,price,total) VALUES (@cartId,@mealId,@mealName,@mealDescription,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
@@ -30,6 +30,30 @@ const sqlStatements = {
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
   SQL_INSERT_CUSTOMER:
     "INSERT INTO dbo.customer (name,email,message,collection_time) VALUES (@name,@email,@collectionTime,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
+  SQL_GET_CART_USER_ID: "SELECT user_id from cart WHERE _id = @id;",
+};
+
+//get the user id of the cart to be used when it first created
+// Get all the cart items
+let getCartUserId = async (cartId) => {
+  // define variable
+  let newCartUserId;
+  try {
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      // checks for sql injection
+      .input("id", sql.Int, cartId)
+      .query(sqlStatements.SQL_GET_CART_USER_ID);
+    newCartUserId = result.recordset[0];
+
+    // Catch and log errors to server side console
+  } catch (err) {
+    console.log("DB Error - get cartItems: ", err.message);
+  }
+  console.log(newCartUserId, "repo");
+  // return user id
+  return newCartUserId;
 };
 
 // insert a meal to the db
@@ -106,7 +130,7 @@ let getAllCartItems = async () => {
 };
 
 // Get all the cart items
-let getCart = async () => {
+let getCartByUserId = async (userId) => {
   // define variable to store the cart
   let cart;
 
@@ -116,8 +140,9 @@ let getCart = async () => {
     const pool = await dbConnPoolPromise;
     const result = await pool
       .request()
+      .input("user_id", sql.NVarChar, userId)
       // execute the select all query (defined above)
-      .query(sqlStatements.SQL_SELECT_ALL_FROM_CART);
+      .query(sqlStatements.SQL_CART_BY_USER_ID);
 
     // first element of the recordset holds cart
     cart = result.recordset[0];
@@ -270,10 +295,11 @@ module.exports = {
   addItemToCart,
   getAllCartItems,
   createNewCart,
-  getCart,
+  getCartByUserId,
   deleteCartItem,
   deleteCart,
   changeQty,
   updateCartSubTotal,
   createCustomer,
+  getCartUserId,
 };

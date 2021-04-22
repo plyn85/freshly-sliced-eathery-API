@@ -10,9 +10,10 @@ router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
     const cartItem = req.body;
-    console.log(cartItem);
+    //console.log(cartItem);
     //call the menu service pass them the mealDetails and the cartItem
     const result = await cartService.addItemToCart(cartItem);
+    console.log("controller", result);
     //send the json result via http
     res.json(result);
   } catch (err) {
@@ -29,10 +30,14 @@ router.get("/", async (req, res) => {
     res.send(err.message);
   }
 });
-//route to get all cart
+//route the cart by user id
 router.get("/get-cart", async (req, res) => {
+  //get the user id from the query sting
+  let userId = req.query.id;
+
   try {
-    const result = await cartService.getCart();
+    //pass the user id to the service
+    const result = await cartService.getCartByUserId(userId);
     res.json(result);
   } catch (err) {
     res.send(err.message);
