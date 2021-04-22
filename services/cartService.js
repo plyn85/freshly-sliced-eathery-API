@@ -33,15 +33,14 @@ let addItemToCart = async (meal) => {
   let userId = meal.user_id;
 
   const mealDetails = await menuRepository.getMealById(meal._id);
-
-  //check if the user id is 0 from request body if theres no user id yet
   //the cart does not exist
   /* if the cart does not exist first a cart will be created 
-     then a cartItem will be created and the FK of the cartItem 
-     using the total form the new cartItem 
-     will be set to match the PK of the cart. Finally the cart subtotal is updated
+  then a cartItem will be created and the FK of the cartItem 
+  using the total form the new cartItem 
+  will be set to match the PK of the cart. Finally the cart subtotal is updated
   */
 
+  //if this is a new user the user id will be 0
   if (userId == 0) {
     console.log("cart does not exist");
     //
@@ -124,19 +123,29 @@ let addItemToCart = async (meal) => {
   */
   else {
     console.log("cart exists");
+    console.log("userid", userId);
+    //get the cart of the current user by passing in the userId
+    let currentUserCart = await getCartByUserId(userId);
+    //console.log(currentUserCart._id);
     //call the cart items repo to check if there are any items
     const cartItems = await cartRepository.getAllCartItems();
+    console.log(cartItems);
     //
     //check if there any items
     if (cartItems != null) {
       //
-      //loop trough the cart items returning true if the cartItems id matched the mealDetails id
+      //loop trough the cart items returning true
+      //if the cartItems id matched the mealDetails id
+      // and the items cart id matches current users cart id
       cartItems.forEach((item) => {
-        if (item.meal_id == mealDetails._id) {
+        if (
+          item.meal_id == mealDetails._id &&
+          item.cart_id == currentUserCart._id
+        ) {
           cartItemExists = true;
         }
       });
-
+      //console.log(cartItemExists);
       //if the cartItem does not already exist prevents adding duplicates
       if (!cartItemExists) {
         // calculate the total for cart Item
@@ -147,7 +156,7 @@ let addItemToCart = async (meal) => {
         validatedCartItem = cartItemValidation.validateCartItem(
           mealDetails,
           meal,
-          cartItems[0].cart_id,
+          currentUserCart._id,
           total
         );
         // if the validation is a success
@@ -163,17 +172,21 @@ let addItemToCart = async (meal) => {
           } else {
             console.log("cart item inserted failed");
           }
-          // //calculate the subTotal by loop through the items
+          // //calculate the subTotal by looping through the items
 
           cartItems.forEach((item) => {
-            //if cart only has one item just add the total to the subTotal
-            if (cartItems.length == 1) {
-              subTotal += item.total;
-            }
-            //if it has more than one item loop through them calculate the total and add
-            // to the subTotal
-            else {
-              subTotal += item.quantity * item.price;
+            //find items for current user
+            if (item.cart_id == currentUserCart._id) {
+              if (cartItems.length == 1) {
+                //if cart only has one item
+                //add the total to the subTotal
+                subTotal += item.total;
+              }
+              //if it has more than one item loop through them calculate the total and add
+              // to the subTotal
+              else {
+                subTotal += item.quantity * item.price;
+              }
             }
           });
           //when loop is finished add the newly inserted cartItem total to

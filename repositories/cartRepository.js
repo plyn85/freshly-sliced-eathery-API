@@ -129,7 +129,7 @@ let getAllCartItems = async () => {
   return cartItems;
 };
 
-// Get all the cart items
+// Get the cart by its user id
 let getCartByUserId = async (userId) => {
   // define variable to store the cart
   let cart;
