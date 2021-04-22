@@ -16,7 +16,7 @@ const sqlStatements = {
     "INSERT INTO dbo.cartItems (cart_id,meal_id,meal_name,meal_description,quantity,price,total) VALUES (@cartId,@mealId,@mealName,@mealDescription,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
   //create a new cart in the db
   SQL_INSERT_NEW_CART:
-    "INSERT INTO dbo.cart (user_id,subtotal) VALUES (@userId,@subTotal) SELECT * from dbo.cart WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.cart (subtotal) VALUES (@subTotal) SELECT * from dbo.cart WHERE _id = SCOPE_IDENTITY();",
   // get a single meal by it id
   SQL_SELECT_BY_ID:
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
@@ -74,7 +74,6 @@ let createNewCart = async (cart) => {
       .request()
       //set the name parameters in query
       // checks for sql injection
-      .input("userId", sql.Int, cart.user_id)
       .input("subtotal", sql.Int, cart.subtotal)
       //execute query
       .query(sqlStatements.SQL_INSERT_NEW_CART);
@@ -244,7 +243,7 @@ let createCustomer = async (customerData) => {
   let customer;
   //insert new customer
   try {
-    //get a database connection and insert SQL
+    //get a database connection and insert SQLs
     const pool = await dbConnPoolPromise;
     const result = await pool
       .request()
@@ -252,13 +251,13 @@ let createCustomer = async (customerData) => {
       // checks for sql injection
       .input("name", sql.NVarChar, customerData.name)
       .input("email", sql.NVarChar, customerData.email)
-      .input("message", sql.NVarChar, customerData.message)
       .input("collectionTime", sql.NVarChar, customerData.collection_time)
+      .input("message", sql.NVarChar, customerData.message)
       //execute query
       .query(sqlStatements.SQL_INSERT_CUSTOMER);
     //the newly inserted order is returned by the query
     customer = result.recordset[0];
-    console.log(customer);
+    console.log("repo", customer);
   } catch (err) {
     console.log("DB Error - error inserting a new order: ", err.message);
   }

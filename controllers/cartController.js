@@ -91,9 +91,10 @@ router.post("/payment/:id", async (req, res) => {
   //get stipe body and cart id from the request body
   let stripeBody = req.body;
   let cartId = req.params.id;
+  console.log(stripeBody);
   try {
     let result = await cartService.stripeHandlePayment(stripeBody, cartId);
-    console.log(result);
+    console.log("cartc", result);
     res.json(result);
   } catch (err) {
     res.status(500);
