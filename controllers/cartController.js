@@ -83,12 +83,12 @@ router.delete("/empty-cart/:id", async (req, res) => {
 
 //update quantity route
 router.put("/increaseQty", async (req, res) => {
-  let meal = req.body;
+  let mealData = req.body;
+  console.log("mealData", mealData);
   console.log(req.params.id);
-  //log to the console
 
   try {
-    let result = await cartService.changeQty(meal);
+    let result = await cartService.changeQty(mealData);
     console.log(result);
     res.json(result);
   } catch (err) {
