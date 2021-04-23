@@ -31,7 +31,14 @@ let addItemToCart = async (meal) => {
   let total = 0;
   let subTotal = 0;
   let userId = meal.user_id;
-
+  let validatedUserId;
+  //validate the user id
+  let validateUserId = baseValidators.validatePositiveNumber(userId);
+  //if validation passes
+  if (validateUserId) {
+    validatedUserId = userId;
+  }
+  console.log("validation passed", validatedUserId);
   const mealDetails = await menuRepository.getMealById(meal._id);
   //the cart does not exist
   /* if the cart does not exist first a cart will be created 
@@ -41,7 +48,7 @@ let addItemToCart = async (meal) => {
   */
 
   //if this is a new user the user id will be 0
-  if (userId == 0) {
+  if (validatedUserId == 0) {
     console.log(userId);
     console.log("cart does not exist");
     //
@@ -126,7 +133,7 @@ let addItemToCart = async (meal) => {
   else {
     console.log("cart exists");
     //get the cart of the current user by passing in the userId
-    let currentUserCart = await getCartByUserId(userId);
+    let currentUserCart = await getCartByUserId(validatedUserId);
     //console.log(currentUserCart._id);
     //call the cart items repo to check if there are any items
     const cartItems = await cartRepository.getAllCartItems();
