@@ -23,8 +23,11 @@ router.post("/", async (req, res) => {
 
 //route to get all cart items from cart
 router.get("/", async (req, res) => {
+  //get the user id from the query sting
+  let userId = req.query.id;
   try {
-    const result = await cartService.getAllCartItems();
+    const result = await cartService.getAllCartItems(userId);
+    console.log(result);
     res.json(result);
   } catch (err) {
     res.send(err.message);

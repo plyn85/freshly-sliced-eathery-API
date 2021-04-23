@@ -34,8 +34,8 @@ const sqlStatements = {
 };
 
 //get the user id of the cart to be used when it first created
-// Get all the cart items
 let getCartUserId = async (cartId) => {
+  console.log("getCartUserId", userId);
   // define variable
   let newCartUserId;
   try {
@@ -56,7 +56,7 @@ let getCartUserId = async (cartId) => {
   return newCartUserId;
 };
 
-// insert a meal to the db
+// insert a cartItem to the db
 let addItemToCart = async (cartItem) => {
   //console.log("cartItems", cartItem);
   //   Declare variables

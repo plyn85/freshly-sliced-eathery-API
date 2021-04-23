@@ -42,6 +42,7 @@ let addItemToCart = async (meal) => {
 
   //if this is a new user the user id will be 0
   if (userId == 0) {
+    console.log(userId);
     console.log("cart does not exist");
     //
     //create new cart and add to the database
@@ -110,7 +111,7 @@ let addItemToCart = async (meal) => {
     if (newCartCreated & firstCartItemInserted && newCartUpdated) {
       //query the user id from the newly created cart passing in the new cart id
       let userCartId = await cartRepository.getCartUserId(newCart._id);
-      console.log(userCartId, "newCartId");
+      console.log(userCartId);
       //return the unique user id  to front end of application
       return userCartId;
     }
@@ -228,20 +229,14 @@ let addItemToCart = async (meal) => {
     }
   }
 };
-// to get all cartItems
-let getAllCartItems = async () => {
-  //get cartItems from db
-  const cartItems = await cartRepository.getAllCartItems();
-  //return cartItems
-  return cartItems;
-};
-// to get the cart
+
+// to get the cart user id
 let getCartByUserId = async (userId) => {
-  //check the string in not empty and contains the correct number of chars
-  let validateLen = !validator.isLength(userId, 16, 16);
   let cart;
+  //check the string in not empty and contains the correct number of chars
+  let validateId = baseValidators.validatePositiveNumber(userId);
   //if true
-  if (validateLen) {
+  if (validateId) {
     //before passing the db
     cart = await cartRepository.getCartByUserId(userId);
   } else {
@@ -250,7 +245,24 @@ let getCartByUserId = async (userId) => {
   //return cartItems
   return cart;
 };
-
+// to get all cartItems
+let getAllCartItems = async (userId) => {
+  //create and empty array
+  let arr = [];
+  //get current cart
+  let currentCart = await getCartByUserId(userId);
+  //get cartItems from db
+  const cartItems = await cartRepository.getAllCartItems();
+  //loop through the cartItems
+  cartItems.forEach((item) => {
+    //match the cartItems cartId to current cart cartId
+    if (item.cart_id == currentCart._id) {
+      arr.push(item);
+    }
+  });
+  //return the array of items
+  return arr;
+};
 //delete a cartItem by id
 let deleteCartItem = async (cartItemId) => {
   //constants and variables
