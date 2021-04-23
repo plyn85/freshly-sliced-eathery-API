@@ -35,7 +35,6 @@ const sqlStatements = {
 
 //get the user id of the cart to be used when it first created
 let getCartUserId = async (cartId) => {
-  console.log("getCartUserId", userId);
   // define variable
   let newCartUserId;
   try {
@@ -51,7 +50,7 @@ let getCartUserId = async (cartId) => {
   } catch (err) {
     console.log("DB Error - get cartItems: ", err.message);
   }
-  console.log(newCartUserId, "repo");
+
   // return user id
   return newCartUserId;
 };

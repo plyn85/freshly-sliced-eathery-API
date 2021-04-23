@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
     //console.log(cartItem);
     //call the menu service pass them the mealDetails and the cartItem
     const result = await cartService.addItemToCart(cartItem);
-    console.log("controller", result);
+    //console.log("controller", result);
     //send the json result via http
     res.json(result);
   } catch (err) {
@@ -48,13 +48,15 @@ router.get("/get-cart", async (req, res) => {
 });
 
 //delete  a single cartItem
-router.delete("/:id", async (req, res) => {
+router.delete("/:id/:userId", async (req, res) => {
   //read the id parameter of the request url
   const cartItemId = req.params.id;
+  const userId = req.params.userId;
+  //console.log(userId);
   // console.log("delete a cartItem controller :", cartItemId);
   //get meal by id
   try {
-    const result = await cartService.deleteCartItem(cartItemId);
+    const result = await cartService.deleteCartItem(cartItemId, userId);
     //should return true or false
     res.json(result);
   } catch (err) {

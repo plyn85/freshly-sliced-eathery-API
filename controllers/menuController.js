@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-//post route for meals
+//post route adds a meal
 router.post("/", async (req, res) => {
   try {
     //get the meal from the request body

@@ -107,11 +107,12 @@ let addItemToCart = async (meal) => {
     } else {
       console.log("cart update failed");
     }
+
     //if all 3 return true return cart user id back to the cartController
     if (newCartCreated & firstCartItemInserted && newCartUpdated) {
       //query the user id from the newly created cart passing in the new cart id
       let userCartId = await cartRepository.getCartUserId(newCart._id);
-      console.log(userCartId);
+      console.log("send back", userCartId);
       //return the unique user id  to front end of application
       return userCartId;
     }
@@ -124,13 +125,12 @@ let addItemToCart = async (meal) => {
   */
   else {
     console.log("cart exists");
-    console.log("userid", userId);
     //get the cart of the current user by passing in the userId
     let currentUserCart = await getCartByUserId(userId);
     //console.log(currentUserCart._id);
     //call the cart items repo to check if there are any items
     const cartItems = await cartRepository.getAllCartItems();
-    console.log(cartItems);
+    //console.log(cartItems);
     //
     //check if there any items
     if (cartItems != null) {
@@ -193,7 +193,7 @@ let addItemToCart = async (meal) => {
           //when loop is finished add the newly inserted cartItem total to
           //the subTotal
           subTotal += insertedCartItem.total;
-          console.log("cart subTotal :", subTotal);
+          //console.log("cart subTotal :", subTotal);
           //
           //add the updated cart subTotal and match the FK of the cartItem
           //with the carts PK
@@ -249,22 +249,26 @@ let getCartByUserId = async (userId) => {
 let getAllCartItems = async (userId) => {
   //create and empty array
   let arr = [];
-  //get current cart
-  let currentCart = await getCartByUserId(userId);
-  //get cartItems from db
-  const cartItems = await cartRepository.getAllCartItems();
-  //loop through the cartItems
-  cartItems.forEach((item) => {
-    //match the cartItems cartId to current cart cartId
-    if (item.cart_id == currentCart._id) {
-      arr.push(item);
-    }
-  });
+  //if the user id is zero no items have been added to
+  //a cart so let the array return empty
+  if (userId > 0) {
+    //get current cart
+    let currentCart = await getCartByUserId(userId);
+    //get cartItems from db
+    const cartItems = await cartRepository.getAllCartItems();
+    //loop through the cartItems
+    cartItems.forEach((item) => {
+      //match the cartItems cartId to current cart cartId
+      if (item.cart_id == currentCart._id) {
+        arr.push(item);
+      }
+    });
+  }
   //return the array of items
   return arr;
 };
 //delete a cartItem by id
-let deleteCartItem = async (cartItemId) => {
+let deleteCartItem = async (cartItemId, userId) => {
   //constants and variables
   let deleteResult = false;
   let subTotal = 0;
@@ -274,8 +278,8 @@ let deleteCartItem = async (cartItemId) => {
   if (baseValidators.validateId(cartItemId)) {
     //get the item price before its deleted
     //first get the cart Items
-    const cartItems = await getAllCartItems();
-    console.log("cartItems :", cartItems);
+    const cartItems = await getAllCartItems(userId);
+    //console.log("cartItems :", cartItems);
     //if the cartItems are returned from db
     if (cartItems != null) {
       //  console.log("cart items returned from db success");
@@ -298,34 +302,37 @@ let deleteCartItem = async (cartItemId) => {
       console.log("item was successfully deleted from db");
 
       //get the current cart
-      const cart = await cartRepository.getCart();
+      const cart = await cartRepository.getCartByUserId(userId);
+      //console.log(cart);
       //if the cart is returned from db
       if (cart != null) {
-        console.log("cart successfully returned form db", cart[0]);
+        console.log("cart successfully returned form db", cart);
         //get the subTotal of the current cart
-        currentCartSubTotal = cart[0].subtotal;
+        currentCartSubTotal = cart.subtotal;
         // console.log("del item price", deletedItemPrice);
         //calculate the new subTotal
         subTotal = currentCartSubTotal - deletedItemPrice;
         // console.log("subtotal", subTotal);
         //update the subTotal of the cart passing in cartId and the new subTotal
         const updatedCart = await cartRepository.updateCartSubTotal(
-          cart[0]._id,
+          cart._id,
           subTotal
         );
         //if the updated subTotal is a success
         if (updatedCart) {
           console.log("cart update subTotal success deleteItem", updatedCart);
           //get the current cart
-          const cart = await cartRepository.getCart();
+          const cart = await cartRepository.getCartByUserId(userId);
           //check to see if the cart subTotal is zero
-          console.log(cart[0].subtotal);
-          if (cart[0].subtotal <= 0) {
+
+          //console.log("cart", cart);
+          if (cart.subtotal <= 0) {
             //delete the cart if it is
-            const deleteCart = cartRepository.deleteCart(cart[0]._id);
-            //if the cart was deleted
+            const deleteCart = await cartRepository.deleteCart(cart._id);
             if (deleteCart) {
               console.log("cart deleted");
+              //return zero to the app if the cart was deleted;
+              return 0;
             } else {
               console.log("cart deletion failed");
             }
@@ -343,7 +350,7 @@ let deleteCartItem = async (cartItemId) => {
     return false;
   }
 
-  return deleteResult;
+  return true;
 };
 
 //delete a cartItem by id
