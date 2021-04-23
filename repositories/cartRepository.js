@@ -182,7 +182,7 @@ let deleteCartItem = async (cartItemId) => {
   }
 };
 
-// delete a single meal by its id
+// delete the entire cart
 let deleteCart = async (cartId) => {
   let rowsAffected = 0;
 
