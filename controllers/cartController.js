@@ -81,20 +81,20 @@ router.delete("/empty-cart/:id", async (req, res) => {
   }
 });
 
-//update quantity route
-router.put("/increaseQty", async (req, res) => {
-  let mealData = req.body;
-  console.log("mealData", mealData);
-  console.log(req.params.id);
+// //update quantity route
+// router.put("/increaseQty", async (req, res) => {
+//   let mealData = req.body;
+//   console.log("mealData", mealData);
+//   // console.log(req.params.id);
 
-  try {
-    let result = await cartService.changeQty(mealData);
-    console.log(result);
-    res.json(result);
-  } catch (err) {
-    res.status(500);
-  }
-});
+//   try {
+//     let result = await cartService.changeQty(mealData);
+//     console.log(result);
+//     res.json(result);
+//   } catch (err) {
+//     res.status(500);
+//   }
+// });
 
 //to handle stripe payments
 router.post("/payment/:id", async (req, res) => {

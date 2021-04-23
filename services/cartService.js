@@ -281,12 +281,18 @@ let deleteCartItem = async (cartItemId, userId) => {
   let subTotal = 0;
   let currentCartSubTotal = 0;
   let deletedItemPrice = 0;
-  //validate the input and if it returns true
-  if (baseValidators.validateId(cartItemId)) {
+  //validated the inputs and if it returns true
+  if (
+    baseValidators.validateId(cartItemId) &&
+    baseValidators.validatePositiveNumber(userId)
+  ) {
     //get the item price before its deleted
-    //first get the cart Items
-    const cartItems = await getAllCartItems(userId);
-    //console.log("cartItems :", cartItems);
+    //first get the current users cart
+    const currentUserCart = await getCartByUserId(userId);
+    console.log("currentuserCart", currentUserCart);
+    //then get all the cartItems
+    const cartItems = await cartRepository.getAllCartItems();
+    console.log("ci", cartItems);
     //if the cartItems are returned from db
     if (cartItems != null) {
       //  console.log("cart items returned from db success");
@@ -294,7 +300,9 @@ let deleteCartItem = async (cartItemId, userId) => {
       cartItems.forEach((item) => {
         // console.log("item total : ", item.total);
         //if the id of the item matches an id in the db
-        if (item._id == cartItemId) {
+        //and the cart item id matches the current users cart id
+        if (item._id == cartItemId && item.cart_id && currentUserCart._id) {
+          console.log("item", item);
           //store the item to be deleted price
           deletedItemPrice = item.total;
         }
@@ -373,140 +381,151 @@ let deleteCart = async (cartId) => {
   return deleteResult;
 };
 
-//change the quantity of cartItem
-let changeQty = async (meal) => {
-  //constants and variables
-  let total = 0;
-  let subTotal = 0;
-  let mealId = meal._id;
-  let validatedMeal;
-  let quantity = meal.quantity;
-  let cartItemId = 0;
-  let cartId = 0;
-  //validate the meal id and quantity
-  console.log("meal id", mealId);
-  validatedMeal = baseValidators.validatePositiveNumber(mealId);
-  // quantity = baseValidators.validatePositiveNumber(quantity);
+// //change the quantity of cartItem
+// let changeQty = async (mealData) => {
+//   //constants and variables
+//   let total = 0;
+//   let subTotal = 0;
+//   let mealId = mealData._id;
+//   let validatedMeal;
+//   let quantity = mealData.quantity;
+//   let cartItemId = 0;
+//   let cartId = 0;
+//   //validate the meal id and quantity
+//   console.log("meal id", mealId);
+//   validatedMeal = baseValidators.validatePositiveNumber(mealId);
+//   // quantity = baseValidators.validatePositiveNumber(quantity);
 
-  // if validation is successful
-  //
-  if (validatedMeal) {
-    console.log("mealid validated");
-    //get meal form db
-    //
-    const mealToUpdate = await menuRepository.getMealById(mealId);
-    //console.log(mealToUpdate);
-    //if the meal is returned from the db
-    //
-    if (mealToUpdate != null) {
-      //console.log("meal from db success :", mealToUpdate);
-      //get the cartItems form the db
-      const cartItems = await cartRepository.getAllCartItems();
-      //if the cart items are returned from the db
-      if (cartItems != null) {
-        //console.log("cart from db success :", cartItems);
-        //loop through the cartItems
-        //
-        cartItems.forEach((item) => {
-          //console.log("item :", item);
-          // matching the meal form the db with cartItem meal from the db
-          if (mealToUpdate._id == item.meal_id) {
-            // console.log(item, mealToUpdate._id, item.meal_id, "meal");
-            //calculate the total to be added to the updated item
-            total = meal.quantity * item.price;
-            //get the id of cart Item
-            cartItemId = item._id;
-          } else {
-            console.log("meal does not match with meal from cartItems");
-          }
-        });
-        //console.log(cartItemId);
-        //update the quantity and the total of cartItem in the db using the cartItems id
-        //
-        const updatedCartItem = await cartRepository.changeQty(
-          quantity,
-          cartItemId,
-          total
-        );
-        //if update returns successfully
-        //
-        if (updatedCartItem != null) {
-          console.log(
-            "cartItem update qty and total success :"
-            // updatedCartItem
-          );
+//   // if validation is successful
+//   //
+//   if (validatedMeal) {
+//     console.log("mealid validated");
+//     //get meal form db
+//     //
+//     const mealToUpdate = await menuRepository.getMealById(mealId);
+//     //console.log(mealToUpdate);
+//     //if the meal is returned from the db
+//     //
+//     if (mealToUpdate != null) {
+//      //first get the cart Items
+//     const cartItems = await cartRepository.getAllCartItems(mealData.user_id);
+//     //console.log("cartItems :", cartItems);
+//     //if the cartItems are returned from db
+//     if (cartItems != null) {
+//       //  console.log("cart items returned from db success");
+//       //loop through the items
+//       cartItems.forEach((item) => {
+//         //if the id of the item matches an id in the db
+//         if (item._id == cartItemId) {
+//           //store the item to be deleted price
+//           deletedItemPrice = item.total;
+//         }
+//       });
+//       //if the cart items are returned from the db
+//       if (cartItems != null) {
+//         //console.log("cart from db success :", cartItems);
+//         //loop through the cartItems
+//         //
+//         cartItems.forEach((item) => {
+//           //console.log("item :", item);
+//           // matching the meal form the db with cartItem meal from the db
+//           if (mealToUpdate._id == item.meal_id) {
+//             // console.log(item, mealToUpdate._id, item.meal_id, "meal");
+//             //calculate the total to be added to the updated item
+//             total = meal.quantity * item.price;
+//             //get the id of cart Item
+//             cartItemId = item._id;
+//           } else {
+//             console.log("meal does not match with meal from cartItems");
+//           }
+//         });
+//         //console.log(cartItemId);
+//         //update the quantity and the total of cartItem in the db using the cartItems id
+//         //
+//         const updatedCartItem = await cartRepository.changeQty(
+//           quantity,
+//           cartItemId,
+//           total
+//         );
+//         //if update returns successfully
+//         //
+//         if (updatedCartItem != null) {
+//           console.log(
+//             "cartItem update qty and total success :"
+//             // updatedCartItem
+//           );
 
-          //
-          //get the cart items after update
-          const cartItems = await cartRepository.getAllCartItems();
-          // console.log("cartItems :", cartItems);
-          //if the cart is successfully returned from db
-          if (cartItems != null) {
-            console.log("cartItems returned success");
-          } else {
-            console.log("cartItems not returned form db");
-          }
+//           //
+//           //get the cart items after update
+//           const cartItems = await cartRepository.getAllCartItems();
+//           // console.log("cartItems :", cartItems);
+//           //if the cart is successfully returned from db
+//           if (cartItems != null) {
+//             console.log("cartItems returned success");
+//           } else {
+//             console.log("cartItems not returned form db");
+//           }
 
-          //
-          // //loop through the cart Items
-          for (let i = 0; i < cartItems.length; i++) {
-            // console.log(cartItems[i]);
-            //constants and variables
-            let item = cartItems[i];
-            let itemTotal = item.total;
-            // if the quantity of an item is zero and the id matches the updated item delete
-            if (item.quantity <= 0 && updatedCartItem._id == item._id) {
-              const cartItemDeleted = await cartRepository.deleteCartItem(
-                item._id
-              );
-              //if the cartItem has beed deleted
-              if (cartItemDeleted) {
-                console.log("cartItem has been deleted changeQty");
-                //delete the item total form before it was deleted form subTotal;
-                subTotal -= itemTotal;
-              }
-            } else {
-              subTotal += item.total;
-              //get the cartId of the items
-              cartId = item.cart_id;
-            }
-          }
+//           //
+//           // //loop through the cart Items
+//           for (let i = 0; i < cartItems.length; i++) {
+//             // console.log(cartItems[i]);
+//             //constants and variables
+//             let item = cartItems[i];
+//             let itemTotal = item.total;
+//             // if the quantity of an item is zero and the id matches the updated item delete
+//             if (item.quantity <= 0 && updatedCartItem._id == item._id) {
+//               const cartItemDeleted = await cartRepository.deleteCartItem(
+//                 item._id
+//               );
+//               //if the cartItem has beed deleted
+//               if (cartItemDeleted) {
+//                 console.log("cartItem has been deleted changeQty");
+//                 //delete the item total form before it was deleted form subTotal;
+//                 subTotal -= itemTotal;
+//               }
+//             } else {
+//               subTotal += item.total;
+//               //get the cartId of the items
+//               cartId = item.cart_id;
+//             }
+//           }
 
-          //if the subtotal is zero delete the cart
-          if (subTotal == 0) {
-            //delete cart
-            const deleteCart = await cartRepository.deleteCart(
-              updatedCartItem.cart_id
-            );
-            //if cart is deleted
-            if (deleteCart) {
-              console.log("delete cart :", deleteCart);
-            } else {
-              console.log("cart delete fail :", deleteCart);
-            }
-          } else {
-            //then update the cart with the new subTotal
-            let updatedSubTotal = await cartRepository.updateCartSubTotal(
-              cartId,
-              subTotal
-            );
-            //if the updated subTotal returns form db
-            if (updatedSubTotal) {
-              console.log("updated subTotal success", updatedSubTotal);
-              return updatedSubTotal;
-            }
-          }
-        }
-      } else {
-        console.log("cartItems returned form db fail");
-      }
-    } else {
-      console.log("meal returned form db failed");
-    }
-  } else {
-    console.log("meal id or quantity validation fail");
-  }
-};
+//           //if the subtotal is zero delete the cart
+//           if (subTotal == 0) {
+//             //delete cart
+//             const deleteCart = await cartRepository.deleteCart(
+//               updatedCartItem.cart_id
+//             );
+//             //if cart is deleted
+//             if (deleteCart) {
+//               console.log("delete cart :", deleteCart);
+//             } else {
+//               console.log("cart delete fail :", deleteCart);
+//             }
+//           } else {
+//             //then update the cart with the new subTotal
+//             let updatedSubTotal = await cartRepository.updateCartSubTotal(
+//               cartId,
+//               subTotal
+//             );
+//             //if the updated subTotal returns form db
+//             if (updatedSubTotal) {
+//               console.log("updated subTotal success", updatedSubTotal);
+//               return updatedSubTotal;
+//             }
+//           }
+//         }
+//       } else {
+//         console.log("cartItems returned form db fail");
+//       }
+//     } else {
+//       console.log("meal returned form db failed");
+//     }
+//   } else {
+//     console.log("meal id or quantity validation fail");
+//   }
+// };
 
 //function to handle order stripe payment and order
 let stripeHandlePayment = async (stripeBody, cartId) => {
@@ -591,7 +610,7 @@ module.exports = {
   getAllCartItems,
   deleteCartItem,
   deleteCart,
-  changeQty,
+  // changeQty,
   getCartByUserId,
   stripeHandlePayment,
   createCustomer,
