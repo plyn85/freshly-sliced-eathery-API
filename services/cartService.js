@@ -562,9 +562,10 @@ let stripeHandlePayment = async (stripeBody, userId) => {
       source: "tok_mastercard",
       description: customer.id,
     });
-
-    //if the customer and charge where added to stipe
-    if (customer != null && charge != null) {
+    console.log("a charge", charge.status);
+    //if the charge status returns as succeeded from chare object
+    //the payment was a success
+    if (charge.status == "succeeded") {
       console.log("payment successful");
 
       //delete there cart
@@ -572,17 +573,24 @@ let stripeHandlePayment = async (stripeBody, userId) => {
       //if the cart was deleted
       if (deleteCart) {
         console.log("cart deleted");
-        //return response
-        return deleteCart;
+        // build an object form stripe charges and return response
+        return (customerInfo = {
+          invoice_num: customer.invoice_prefix,
+          amount_charged: charge.amount,
+        });
+        //return deleteCart;
         //if the cart is deleted
       } else {
         console.log("cart deletion failed");
       }
 
       //return true if the payments where a success
-      return true;
+      //return true;
     } else {
       console.log("Payment failed");
+      //return false if payment failed
+
+      return false;
     }
   } catch (err) {
     res.send(err);
@@ -604,7 +612,7 @@ let createCustomer = async (customer) => {
     //pass to repository to add to db
     validatedCustomer = await cartRepository.createCustomer(validateCustomer);
   }
-  console.log("serv", validatedCustomer);
+  console.log("customerInfo", validatedCustomer);
   //and
   //return the object
   return validatedCustomer;
