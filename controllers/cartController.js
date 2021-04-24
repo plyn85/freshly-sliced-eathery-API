@@ -100,10 +100,10 @@ router.put("/increaseQty", async (req, res) => {
 router.post("/payment/:id", async (req, res) => {
   //get stipe body and cart id from the request body
   let stripeBody = req.body;
-  let cartId = req.params.id;
-  console.log(stripeBody);
+  let userId = req.params.id;
+  //console.log(stripeBody);
   try {
-    let result = await cartService.stripeHandlePayment(stripeBody, cartId);
+    let result = await cartService.stripeHandlePayment(stripeBody, userId);
     console.log("cartc", result);
     res.json(result);
   } catch (err) {

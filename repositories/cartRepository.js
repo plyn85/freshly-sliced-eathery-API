@@ -29,7 +29,7 @@ const sqlStatements = {
   SQL_UPDATE_CART_SUB_TOTAL:
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
   SQL_INSERT_CUSTOMER:
-    "INSERT INTO dbo.customer (name,email,message,collection_time) VALUES (@name,@email,@collectionTime,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.customer (name,email,collection_time,message) VALUES (@name,@email,@collectionTime,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
   SQL_GET_CART_USER_ID: "SELECT user_id from cart WHERE _id = @id;",
 };
 
@@ -148,7 +148,7 @@ let getCartByUserId = async (userId) => {
 
     // Catch and log errors to server side console
   } catch (err) {
-    console.log("DB Error - get cart: ", err.message);
+    console.log("DB Error - get cart by user id: ", err.message);
   }
 
   // return all cartItems

@@ -258,9 +258,15 @@ let getAllCartItems = async (userId) => {
   let arr = [];
   //if the user id is zero no items have been added to
   //a cart so let the array return empty
-  if (userId > 0) {
-    //get current cart
-    let currentCart = await getCartByUserId(userId);
+
+  //get current cart
+  let currentCart = await getCartByUserId(userId);
+  //if there are no items in the current cart return zero
+  if (currentCart == null) {
+    return 0;
+  }
+  //else return the items
+  else {
     //get cartItems from db
     const cartItems = await cartRepository.getAllCartItems();
     //loop through the cartItems
@@ -292,7 +298,7 @@ let deleteCartItem = async (cartItemId, userId) => {
     //console.log("currentuserCart", currentUserCart);
     //then get all the cartItems
     const cartItems = await cartRepository.getAllCartItems();
-    console.log("ci", cartItems);
+    //console.log("ci", cartItems);
     //if the cartItems are returned from db
     if (cartItems != null) {
       //  console.log("cart items returned from db success");
@@ -302,7 +308,7 @@ let deleteCartItem = async (cartItemId, userId) => {
         //if the id of the item matches an id in the db
         //and the cart item id matches the current users cart id
         if (item._id == cartItemId && item.cart_id && currentUserCart._id) {
-          console.log("item", item);
+          //console.log("item", item);
           //store the item to be deleted price
           deletedItemPrice = item.total;
         }
@@ -368,7 +374,7 @@ let deleteCartItem = async (cartItemId, userId) => {
   return true;
 };
 
-//delete a cartItem by id
+//delete the entire cart
 let deleteCart = async (cartId) => {
   let deleteResult = false;
   //validate the input by call the id function form the base validators
@@ -531,59 +537,56 @@ let changeQty = async (mealData) => {
 };
 
 //function to handle order stripe payment and order
-let stripeHandlePayment = async (stripeBody, cartId) => {
-  //constants and variables
-  let customerPaymentData;
-  //query the db for the cart
-  let cart = await cartRepository.getCart();
-  // console.log("stipe body", stripeBody);
+let stripeHandlePayment = async (stripeBody, userId) => {
+  let userCart;
   //validate the id form request body
-  let validatedId = baseValidators.validatePositiveNumber(cartId);
-
-  //if it returns true and the cart id from the request body matches
-  // the cart id form the db
-  if (validatedId && cartId == cart[0]._id) {
-    //add the customer info and payment to stripe
-    try {
-      const customer = await stripe.customers.create({
-        description: stripeBody.card.id,
-        source: stripeBody.id,
-      });
-      //add the charge info to stripe
-      const charge = await stripe.charges.create({
-        //passing in the current card subtotal as the amount
-        amount: cart[0].subtotal * 100,
-        currency: "eur",
-        source: "tok_mastercard",
-        description: customer.id,
-      });
-      //if the customer and charge where added to stipe
-      if (customer != null && charge != null) {
-        console.log("charge", customer.id);
-        //delete the cart if it is
-        const deleteCart = await cartRepository.deleteCart(cart[0]._id);
-        //if the cart was deleted
-        if (deleteCart) {
-          console.log("cart deleted");
-          //if the cart is deleted
-        } else {
-          console.log("cart deletion failed");
-        }
-
-        //return true if the payments where a success
-        return true;
-      } else {
-        console.log("Payment failed");
-      }
-    } catch (err) {
-      res.send(err);
-    }
-  } else {
-    console.log("cart validation failed or cart ids do not match");
-    //other wise return false
-    return false;
+  let validateId = baseValidators.validatePositiveNumber(userId);
+  //if validation is true
+  if (validateId) {
+    //get the users cart
+    userCart = await cartRepository.getCartByUserId(userId);
+    console.log(userCart.subtotal);
   }
-  // return customerPaymentData;
+
+  //add the customer info and payment to stripe
+  try {
+    const customer = await stripe.customers.create({
+      description: stripeBody.card.id,
+      source: stripeBody.id,
+    });
+    //add the charge info to stripe
+    const charge = await stripe.charges.create({
+      //passing in the current card subtotal as the amount
+      amount: userCart.subtotal * 100,
+      currency: "eur",
+      source: "tok_mastercard",
+      description: customer.id,
+    });
+
+    //if the customer and charge where added to stipe
+    if (customer != null && charge != null) {
+      console.log("payment successful");
+
+      //delete there cart
+      const deleteCart = await cartRepository.deleteCart(userCart._id);
+      //if the cart was deleted
+      if (deleteCart) {
+        console.log("cart deleted");
+        //return response
+        return deleteCart;
+        //if the cart is deleted
+      } else {
+        console.log("cart deletion failed");
+      }
+
+      //return true if the payments where a success
+      return true;
+    } else {
+      console.log("Payment failed");
+    }
+  } catch (err) {
+    res.send(err);
+  }
 };
 
 //
