@@ -21,7 +21,7 @@ let createMeal = async (meal) => {
   if (validatedMeal != null) {
     newlyInsertedMeal = await menuRepository.createMeal(validatedMeal);
   } else {
-    //validation for product failed
+    //validation for meal failed
     newlyInsertedMeal = { error: "invalid meal" };
 
     //log the result
@@ -38,7 +38,6 @@ let getMealById = async (mealId) => {
     console.log("getProductsByCatId service error: invalid id parameter");
     return "invalid parameter";
   }
-  // console.log("meal id validated: ", mealId);
 
   //get the product if validation passed
   const meal = await menuRepository.getMealById(mealId);
@@ -56,7 +55,6 @@ let deleteMeal = async (mealId) => {
   }
   //delete meal by id
   deleteResult = await menuRepository.deleteMeal(mealId);
-  // console.log(deleteResult, "meal service");
 
   return deleteResult;
 };

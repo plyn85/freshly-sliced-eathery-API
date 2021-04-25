@@ -5,7 +5,7 @@ const validator = require("validator");
 // needs to be validated before using in the application
 let validateCartItem = (mealDetails, meal, cartId, total) => {
   //
-  //console.log("meal deat", mealDetails.meal_description);
+
   // Declare constants and variables
   //
   let validatedCartItem;
@@ -26,7 +26,6 @@ let validateCartItem = (mealDetails, meal, cartId, total) => {
     baseValidators.validatePositiveNumber(meal.quantity) &&
     baseValidators.validatePrice(mealDetails.meal_price) &&
     baseValidators.validatePrice(total)
-    // baseValidators.validatePrice(subTotal)
   ) {
     // Validation passed
     // create a new cartItem instance based on CartItem model object

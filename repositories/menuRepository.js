@@ -49,7 +49,6 @@ let getMenu = async () => {
 
 // insert a meal to the db
 let createMeal = async (meal) => {
-  // console.log(" product repo: ", meal);
   //Declare variables
   let insertedMeal;
   //insert new product
@@ -76,7 +75,7 @@ let createMeal = async (meal) => {
 // get a single meal by id
 let getMealById = async (mealId) => {
   let meal;
-  //console.log("repo meal id:", mealId);
+
   // returns a single meal with matching id
   try {
     // Get a DB connection and execute SQL

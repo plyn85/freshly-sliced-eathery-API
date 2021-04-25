@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
   try {
     //get the meal from the request body
     const meal = req.body;
-    // console.log("Post route meal :", meal);
+
     //call the menu service
     const result = await menuService.createMeal(meal);
     //send the json result via http
@@ -36,15 +36,13 @@ router.post("/", async (req, res) => {
 
 //get a single meal route
 router.get("/:id", async (req, res) => {
-  // let result;
   //read the id parameter of the request url
   const mealId = req.params.id;
-  // console.log(mealId, "controller");
+
   //get meal by id
   try {
     const result = await menuService.getMealById(mealId);
     res.json(result);
-    // console.log(result, "result meal id controller");
   } catch (err) {
     res.status(500);
     res.send(err.message);
@@ -55,7 +53,7 @@ router.get("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   //read the id parameter of the request url
   const mealId = req.params.id;
-  // console.log("meal controller mealId :", mealId);
+
   //get meal by id
   try {
     const result = await menuService.deleteMeal(mealId);

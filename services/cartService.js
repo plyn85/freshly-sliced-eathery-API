@@ -409,7 +409,7 @@ let changeQty = async (mealData) => {
     //get meal form db
     //
     const mealToUpdate = await menuRepository.getMealById(mealId);
-    //console.log(mealToUpdate);
+
     //if the meal is returned from the db
     //
     if (mealToUpdate != null) {
@@ -420,14 +420,12 @@ let changeQty = async (mealData) => {
       console.log(currentUserCart);
       //then get the cart items
       const cartItems = await cartRepository.getAllCartItems();
-      //console.log(cartItems);
 
       //if the cart items are returned from the db
       if (cartItems != null) {
         //loop through the cartItems
         //
         cartItems.forEach((item) => {
-          //console.log("item", item);
           // matching the meal form the db with cartItem meal from the db
           if (
             mealToUpdate._id == item.meal_id &&
@@ -439,7 +437,7 @@ let changeQty = async (mealData) => {
             cartItemId = item._id;
           }
         });
-        //console.log(cartItemId);
+
         //update the quantity and the total of cartItem in the db using the cartItems id
         //
         const updatedCartItem = await cartRepository.changeQty(
@@ -458,7 +456,7 @@ let changeQty = async (mealData) => {
           //
           //get the cart items after update
           const cartItems = await cartRepository.getAllCartItems();
-          //console.log("cartItems :", cartItems);
+
           //if the cart is successfully returned from db
           if (cartItems != null) {
             console.log("cartItems returned success");

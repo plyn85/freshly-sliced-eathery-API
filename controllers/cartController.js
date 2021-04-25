@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
   try {
     //get the meal id and the entire body from the body of the request
     const cartItem = req.body;
-    //console.log(cartItem);
+
     //call the menu service pass them the mealDetails and the cartItem
     const result = await cartService.addItemToCart(cartItem);
     //console.log("controller", result);
@@ -52,8 +52,7 @@ router.delete("/:id/:userId", async (req, res) => {
   //read the id parameter of the request url
   const cartItemId = req.params.id;
   const userId = req.params.userId;
-  //console.log(userId);
-  // console.log("delete a cartItem controller :", cartItemId);
+
   //get meal by id
   try {
     const result = await cartService.deleteCartItem(cartItemId, userId);
@@ -69,7 +68,7 @@ router.delete("/:id/:userId", async (req, res) => {
 router.delete("/empty-cart/:id", async (req, res) => {
   //read the id parameter of the request url
   const cartId = req.params.id;
-  // console.log("delete a cartItem controller :", cartItemId);
+
   //get meal by id
   try {
     const result = await cartService.deleteCart(cartId);
@@ -85,7 +84,6 @@ router.delete("/empty-cart/:id", async (req, res) => {
 router.put("/increaseQty", async (req, res) => {
   let mealData = req.body;
   console.log("mealData", mealData);
-  // console.log(req.params.id);
 
   try {
     let result = await cartService.changeQty(mealData);
@@ -101,7 +99,7 @@ router.post("/payment/:id", async (req, res) => {
   //get stipe body and cart id from the request body
   let stripeBody = req.body;
   let userId = req.params.id;
-  //console.log(stripeBody);
+
   try {
     let result = await cartService.stripeHandlePayment(stripeBody, userId);
     console.log("amount", result);
