@@ -7,7 +7,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const HOST = "127.0.0.1";
-const PORT = 8000;
+const PORT = 3000;
 
 // app is a new instance of express (the web app framework)
 let app = express();

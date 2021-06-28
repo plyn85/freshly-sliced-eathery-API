@@ -1,7 +1,14 @@
-function CustomerForm(name, email, collection_time, message = null) {
+function CustomerForm(
+  name,
+  email,
+  collectionOrDeliveryTime,
+  address = null,
+  message = null
+) {
   this.name = name;
   this.email = email;
-  this.collection_time = collection_time;
+  this.collectionOrDeliveryTime = collectionOrDeliveryTime;
+  this.address = address;
   this.message = message;
 }
 module.exports = CustomerForm;

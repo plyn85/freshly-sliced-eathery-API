@@ -7,10 +7,11 @@ let validateCustomer = (customerData) => {
   let validatedCustomer;
 
   //get the collection Data
-  let collectionTime = customerData.collection_time;
+  let collectionOrDeliveryTime = customerData.collectionOrDeliveryTime;
   let message = customerData.message;
   let name = customerData.name;
   let email = customerData.email;
+  let address = customerData.address;
   //console.log(name, email, message, collectionTime);
   // debug to console - if no data
   //
@@ -21,10 +22,16 @@ let validateCustomer = (customerData) => {
   if (message === "") {
     message = `no message left by customer`;
   }
+
+  //if delivery is empty
+  if (message === "") {
+    address = `customer has chosen to collect there meal`;
+  }
   if (
     !validator.isEmpty(name) &&
     validator.isEmail(email) &&
-    !validator.isEmpty(collectionTime) &&
+    !validator.isEmpty(collectionOrDeliveryTime) &&
+    !validator.isEmpty(address) &&
     !validator.isEmpty(message)
   ) {
     // Validation passed
@@ -32,7 +39,8 @@ let validateCustomer = (customerData) => {
     validatedCustomer = new CustomerForm(
       validator.escape(name),
       validator.escape(email),
-      validator.escape(collectionTime),
+      validator.escape(collectionOrDeliveryTime),
+      validator.escape(address),
       validator.escape(message)
     );
   } else {

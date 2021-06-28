@@ -505,7 +505,7 @@ let changeQty = async (mealData) => {
             //if cart is deleted
             if (deleteCart) {
               console.log("cartDeleted", deleteCart);
-              //return true to the app
+              //return true to the frontend of application
               return deleteCart;
             } else {
               console.log("cart delete fail :", deleteCart);
@@ -554,18 +554,16 @@ let stripeHandlePayment = async (stripeBody, userId) => {
     });
     //add the charge info to stripe
     const charge = await stripe.charges.create({
-      //passing in the current card subtotal as the amount
+      //passing in the current cart subtotal as the amount
       amount: userCart.subtotal * 100,
       currency: "eur",
       source: "tok_mastercard",
       description: customer.id,
     });
-    console.log("a charge", charge.status);
-    //if the charge status returns as succeeded from chare object
+
+    //if the charge status returns as succeeded from charge object
     //the payment was a success
     if (charge.status == "succeeded") {
-      console.log("payment successful");
-
       //delete there cart
       const deleteCart = await cartRepository.deleteCart(userCart._id);
       //if the cart was deleted
@@ -576,14 +574,9 @@ let stripeHandlePayment = async (stripeBody, userId) => {
           invoice_num: customer.invoice_prefix,
           amount_charged: charge.amount,
         });
-        //return deleteCart;
-        //if the cart is deleted
       } else {
         console.log("cart deletion failed");
       }
-
-      //return true if the payments where a success
-      //return true;
     } else {
       console.log("Payment failed");
       //return false if payment failed

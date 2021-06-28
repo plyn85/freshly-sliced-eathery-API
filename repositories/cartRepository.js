@@ -5,31 +5,34 @@ const { sql, dbConnPoolPromise } = require("../database/db.js");
 
 //all sql statement in this object;
 const sqlStatements = {
-  //select all cartItems
   SQL_SELECT_ALL_CART_ITEMS:
     "SELECT * FROM dbo.cartItems ORDER BY _id ASC for json path;",
-  //select all from the cart
+
   SQL_CART_BY_USER_ID:
     "SELECT * FROM dbo.cart WHERE user_id  = @user_id for json path, without_array_wrapper;",
-  // insert a meal to db
+
   SQL_INSERT:
     "INSERT INTO dbo.cartItems (cart_id,meal_id,meal_name,meal_description,quantity,price,total) VALUES (@cartId,@mealId,@mealName,@mealDescription,@cartItemQuantity, @cartItemPrice,@cartItemTotal); SELECT * from dbo.cartItems WHERE _id = SCOPE_IDENTITY();",
-  //create a new cart in the db
+
   SQL_INSERT_NEW_CART:
     "INSERT INTO dbo.cart (subtotal) VALUES (@subTotal) SELECT * from dbo.cart WHERE _id = SCOPE_IDENTITY();",
-  // get a single meal by it id
+
   SQL_SELECT_BY_ID:
     "SELECT * FROM dbo.meals WHERE _id = @id  for json path, without_array_wrapper;",
-  // delete a meal by its id
+
   SQL_DELETE_CART_ITEM: "DELETE FROM dbo.cartItems WHERE _id = @id;",
-  //delete cart by its id
+
   SQL_DELETE_CART: "DELETE FROM dbo.cart WHERE _id = @id;",
+
   SQL_UPDATE_CART_ITEM_QTY:
     "UPDATE dbo.cartItems SET quantity = @quantity , total = @total WHERE _id = @id; SELECT * FROM dbo.cartItems WHERE _id = @id;",
+
   SQL_UPDATE_CART_SUB_TOTAL:
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
+
   SQL_INSERT_CUSTOMER:
-    "INSERT INTO dbo.customer (name,email,collection_time,message) VALUES (@name,@email,@collectionTime,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.customer (name,email,address,collection_delivery_time,message) VALUES (@name,@email,@address,@collection_delivery_time,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
+
   SQL_GET_CART_USER_ID: "SELECT user_id from cart WHERE _id = @id;",
 };
 
@@ -275,13 +278,18 @@ let createCustomer = async (customerData) => {
       // checks for sql injection
       .input("name", sql.NVarChar, customerData.name)
       .input("email", sql.NVarChar, customerData.email)
-      .input("collectionTime", sql.NVarChar, customerData.collection_time)
+      .input(
+        "collection_delivery_time",
+        sql.NVarChar,
+        customerData.collectionOrDeliveryTime
+      )
+      .input("address", sql.NVarChar, customerData.address)
       .input("message", sql.NVarChar, customerData.message)
       //execute query
       .query(sqlStatements.SQL_INSERT_CUSTOMER);
     //the newly inserted order is returned by the query
     customer = result.recordset[0];
-    console.log("repo", customer);
+    //console.log("repo", customer);
   } catch (err) {
     console.log("DB Error - error inserting a new order: ", err.message);
   }

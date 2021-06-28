@@ -109,8 +109,8 @@ router.post("/payment/:id", async (req, res) => {
   }
 });
 
-//to handle collection info
-router.post("/collection", async (req, res) => {
+//to handle collection or delivery info
+router.post("/collectionOrDelivery", async (req, res) => {
   //getting the body of the request
   let customerData = req.body;
   console.log(customerData);
