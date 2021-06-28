@@ -31,7 +31,7 @@ const sqlStatements = {
     "UPDATE dbo.cart SET subTotal = @subTotal WHERE _id = @id; SELECT * FROM dbo.cart WHERE _id = @id;",
 
   SQL_INSERT_CUSTOMER:
-    "INSERT INTO dbo.customer (name,email,address,collection_delivery_time,message) VALUES (@name,@email,@address,@collection_delivery_time,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.customer (name,email,address,delivery,collection,collection_delivery_time,message) VALUES (@name,@email,@address,@delivery,@collection,@collection_delivery_time,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
 
   SQL_GET_CART_USER_ID: "SELECT user_id from cart WHERE _id = @id;",
 };
@@ -278,13 +278,15 @@ let createCustomer = async (customerData) => {
       // checks for sql injection
       .input("name", sql.NVarChar, customerData.name)
       .input("email", sql.NVarChar, customerData.email)
+      .input("address", sql.NVarChar, customerData.address)
+      .input("message", sql.NVarChar, customerData.message)
+      .input("delivery", sql.NVarChar, customerData.delivery)
+      .input("collection", sql.NVarChar, customerData.collection)
       .input(
         "collection_delivery_time",
         sql.NVarChar,
         customerData.collectionOrDeliveryTime
       )
-      .input("address", sql.NVarChar, customerData.address)
-      .input("message", sql.NVarChar, customerData.message)
       //execute query
       .query(sqlStatements.SQL_INSERT_CUSTOMER);
     //the newly inserted order is returned by the query
