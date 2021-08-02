@@ -1,28 +1,10 @@
 //imports
 
 const router = require("express").Router();
-
+const userService = require("../services/userService.js");
 // Auth0
-const { authConfig, checkJwt } = require("../middleware/jwtAuth.js");
-//axios
-const axios = require("axios").default;
+const { checkJwt } = require("../middleware/jwtAuth.js");
 
-//get the user info from auth
-let getAuthUser = async (accessToken) => {
-  //get user info from auth0
-  const url = `${authConfig.issuer}userinfo`;
-  const config = {
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-  };
-  //use access to make request
-  const user = await axios.get(url, config);
-  //return the user data
-  console.log(user.data);
-  return user.data;
-};
-//
 //route to get customer info after login
 router.get(
   "/login",
@@ -36,7 +18,7 @@ router.get(
     if (req.headers["authorization"]) {
       try {
         let token = await req.headers["authorization"].replace("Bearer ", "");
-        const userProfile = await getAuthUser(token);
+        const userProfile = await userService.getAuthUser(token);
         console.log("%c user profile: ", "color: blue", userProfile);
         console.log("%c user email: ", "color: blue", userProfile.email);
       } catch (err) {
@@ -52,6 +34,21 @@ router.get(
     }
   }
 );
+
+//to handle collection or delivery info and create a customer in the db
+router.post("/collectionOrDelivery", async (req, res) => {
+  //getting the body of the request
+  let customerData = req.body;
+  console.log(customerData);
+  //sending the request body to collection function
+  try {
+    let result = await userService.createCustomer(customerData);
+    console.log("collection order", result._id);
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+  }
+});
 
 //exports
 module.exports = router;
