@@ -1,5 +1,6 @@
 //require the database connection
 
+const { json } = require("express");
 const { rows } = require("mssql");
 const { sql, dbConnPoolPromise } = require("../database/db.js");
 
@@ -13,9 +14,14 @@ const sqlStatements = {
 
 //create an order in db
 let createCustomer = async (customerData) => {
-  console.log(customerData);
+  console.log("auth email", customerData.email);
   //   Declare variables
   let customer;
+  //change name user nickname from the auth0 API
+  // to name to match with db if it exists
+  if (customerData.nickname != null) {
+    customerData.nickname = customerData.name;
+  }
   //insert new customer
   try {
     //get a database connection and insert SQLs
@@ -49,6 +55,7 @@ let createCustomer = async (customerData) => {
 //find the user in the db by email after login
 let findUserByEmail = async (userEmail) => {
   // define variable
+  // userEmail = "plyn@test.com";
   let userData;
   // userEmail = JSON.stringify(`plyn85@hotmail.co.uk`);
   try {
@@ -59,8 +66,9 @@ let findUserByEmail = async (userEmail) => {
       .input("email", sql.NVarChar, userEmail)
       .query(sqlStatements.SQL_FIND_BY_USER_EMAIL);
     userData = result.recordset[0];
+    //log to the console
+    console.log("findUserByEmail", userData);
     //return the user data
-    console.log("userRepo", userData);
     return userData;
     // Catch and log errors to server side console
   } catch (err) {
@@ -71,7 +79,13 @@ let findUserByEmail = async (userEmail) => {
   return userData;
 };
 
+//add to db for customer that already has a email in the db from auth0 sign up
+let addCustomerInfo = async () => {
+  console.log("adding customer info");
+};
+
 module.exports = {
   createCustomer,
   findUserByEmail,
+  addCustomerInfo,
 };
