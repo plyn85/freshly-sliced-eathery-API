@@ -14,14 +14,10 @@ const sqlStatements = {
 
 //create an order in db
 let createCustomer = async (customerData) => {
-  console.log("auth email", customerData.email);
+  console.log("auth email", typeof customerData.email);
   //   Declare variables
   let customer;
-  //change name user nickname from the auth0 API
-  // to name to match with db if it exists
-  if (customerData.nickname != null) {
-    customerData.nickname = customerData.name;
-  }
+
   //insert new customer
   try {
     //get a database connection and insert SQLs
@@ -45,7 +41,7 @@ let createCustomer = async (customerData) => {
       .query(sqlStatements.SQL_INSERT_CUSTOMER);
     //the newly inserted order is returned by the query
     customer = result.recordset[0];
-    //console.log("repo", customer);
+    console.log("create cus", result);
   } catch (err) {
     console.log("DB Error - error inserting a new order: ", err.message);
   }
@@ -54,8 +50,9 @@ let createCustomer = async (customerData) => {
 // SELECT * FROM dbo.customer WHERE email  = 'plyn85@hotmail.co.uk'
 //find the user in the db by email after login
 let findUserByEmail = async (userEmail) => {
-  // define variable
   // userEmail = "plyn@test.com";
+  console.log("find user by email", typeof userEmail, userEmail);
+  // define variable
   let userData;
   // userEmail = JSON.stringify(`plyn85@hotmail.co.uk`);
   try {
