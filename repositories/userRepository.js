@@ -7,7 +7,8 @@ const { sql, dbConnPoolPromise } = require("../database/db.js");
 const sqlStatements = {
   SQL_INSERT_CUSTOMER:
     "INSERT INTO dbo.customer (name,email,address,delivery,collection,collection_delivery_time,message) VALUES (@name,@email,@address,@delivery,@collection,@collection_delivery_time,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
-
+  SQL_INSERT_CUSTOMER_AFTER_SIGN_UP:
+    "INSERT INTO dbo.customer (name,email) VALUES (@name,@email) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
   SQL_FIND_BY_USER_EMAIL:
     "SELECT * FROM dbo.customer WHERE email  = @email for json path, without_array_wrapper;",
 };
@@ -50,8 +51,6 @@ let createCustomer = async (customerData) => {
 // SELECT * FROM dbo.customer WHERE email  = 'plyn85@hotmail.co.uk'
 //find the user in the db by email after login
 let findUserByEmail = async (userEmail) => {
-  // userEmail = "plyn@test.com";
-  console.log("find user by email", typeof userEmail, userEmail);
   // define variable
   let userData;
   // userEmail = JSON.stringify(`plyn85@hotmail.co.uk`);
@@ -63,8 +62,7 @@ let findUserByEmail = async (userEmail) => {
       .input("email", sql.NVarChar, userEmail)
       .query(sqlStatements.SQL_FIND_BY_USER_EMAIL);
     userData = result.recordset[0];
-    //log to the console
-    console.log("findUserByEmail", userData);
+
     //return the user data
     return userData;
     // Catch and log errors to server side console
@@ -77,12 +75,37 @@ let findUserByEmail = async (userEmail) => {
 };
 
 //add to db for customer that already has a email in the db from auth0 sign up
-let addCustomerInfo = async () => {
-  console.log("adding customer info");
+let createCustomerAfterSignUp = async (customerData) => {
+  //   Declare variables
+  let customer;
+
+  //insert new customer after sign up only name and email
+  // will be added to the db
+  try {
+    //get a database connection and insert SQLs
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      //set the name parameters in query
+      // checks for sql injection
+      .input("name", sql.NVarChar, customerData.nickname)
+      .input("email", sql.NVarChar, customerData.email)
+      //execute query
+      .query(sqlStatements.SQL_INSERT_CUSTOMER_AFTER_SIGN_UP);
+    //the newly inserted order is returned by the query
+    customer = result.recordset[0];
+    console.log("create cus after sign up", result);
+  } catch (err) {
+    console.log(
+      "DB Error - error inserting newly signed up customer: ",
+      err.message
+    );
+  }
+  return customer;
 };
 
 module.exports = {
   createCustomer,
   findUserByEmail,
-  addCustomerInfo,
+  createCustomerAfterSignUp,
 };

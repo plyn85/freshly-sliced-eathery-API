@@ -25,12 +25,12 @@ let getAuthUser = async (accessToken) => {
   //if the user data is not null
   if (userData == null) {
     //pass to repository to add to db
-    userData = await userRepository.createCustomer(user.data);
+    userData = await userRepository.createCustomerAfterSignUp(user.data);
+    console.log("this user just singed up");
   } else {
     console.log("user already exists in db, createCustomer :", userData);
   }
-  //return the user data
-  console.log("userService: ", userData);
+
   return userData;
 };
 //
@@ -41,7 +41,6 @@ let createCustomer = async (customer) => {
 
   //validate customer and create instance
   let validateCustomer = customerValidation.validateCustomer(customer);
-  console.log("val cust", validateCustomer);
   // if the validation is a success
   if (validateCustomer != null) {
     //check if the user is already in the db
