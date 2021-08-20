@@ -1,7 +1,7 @@
 //imports
 const cartRepository = require("../repositories/cartRepository");
 const cartItemValidation = require("../validators/cartItemValidation");
-const customerValidation = require("../validators/customerValidation");
+
 const baseValidators = require("../validators/baseValidators");
 const menuRepository = require("../repositories/menuRepository");
 const validator = require("validator");
@@ -9,8 +9,7 @@ const validator = require("validator");
 const Cart = require("../models/cart");
 const CartItem = require("../models/cartItems");
 
-//stripe secret key
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 
 //
 //add a new cart item to the cart
@@ -38,7 +37,7 @@ let addItemToCart = async (meal) => {
   if (validateUserId) {
     validatedUserId = userId;
   }
-  console.log("validation passed", validatedUserId);
+
   const mealDetails = await menuRepository.getMealById(meal._id);
   //the cart does not exist
   /* if the cart does not exist first a cart will be created 
@@ -49,14 +48,11 @@ let addItemToCart = async (meal) => {
 
   //if this is a new user the user id will be 0
   if (validatedUserId == 0) {
-    console.log(userId);
-    console.log("cart does not exist");
     //
     //create new cart and add to the database
     newCart = await cartRepository.createNewCart(new Cart());
-    //if cart is created successfully log to console
+    //if cart is created successfully set to true
     if (newCart != null) {
-      console.log("New cart created", newCart);
       newCartCreated = true;
     } else {
       console.log("cart was not created");
@@ -119,7 +115,6 @@ let addItemToCart = async (meal) => {
     if (newCartCreated & firstCartItemInserted && newCartUpdated) {
       //query the user id from the newly created cart passing in the new cart id
       let userCartId = await cartRepository.getCartUserId(newCart._id);
-      console.log("send back", userCartId);
       //return the unique user id  to front end of application
       return userCartId;
     }
@@ -534,80 +529,6 @@ let changeQty = async (mealData) => {
   }
 };
 
-//function to handle order stripe payment and order
-let stripeHandlePayment = async (stripeBody, userId) => {
-  let userCart;
-  //validate the id form request body
-  let validateId = baseValidators.validatePositiveNumber(userId);
-  //if validation is true
-  if (validateId) {
-    //get the users cart
-    userCart = await cartRepository.getCartByUserId(userId);
-    console.log(userCart.subtotal);
-  }
-
-  //add the customer info and payment to stripe
-  try {
-    const customer = await stripe.customers.create({
-      description: stripeBody.card.id,
-      source: stripeBody.id,
-    });
-    //add the charge info to stripe
-    const charge = await stripe.charges.create({
-      //passing in the current cart subtotal as the amount
-      amount: userCart.subtotal * 100,
-      currency: "eur",
-      source: "tok_mastercard",
-      description: customer.id,
-    });
-
-    //if the charge status returns as succeeded from charge object
-    //the payment was a success
-    if (charge.status == "succeeded") {
-      //delete there cart
-      const deleteCart = await cartRepository.deleteCart(userCart._id);
-      //if the cart was deleted
-      if (deleteCart) {
-        console.log("cart deleted");
-        // build an object form stripe charges and return response
-        return (customerInfo = {
-          invoice_num: customer.invoice_prefix,
-          amount_charged: charge.amount,
-        });
-      } else {
-        console.log("cart deletion failed");
-      }
-    } else {
-      console.log("Payment failed");
-      //return false if payment failed
-
-      return false;
-    }
-  } catch (err) {
-    res.send(err);
-  }
-};
-
-//
-//function to handle the collection data
-let createCustomer = async (customer) => {
-  //constants and variables
-  let validatedCustomer;
-
-  //validate customer and create instance
-  let validateCustomer = customerValidation.validateCustomer(customer);
-
-  //
-  // if the validation is a success
-  if (validateCustomer != null) {
-    //pass to repository to add to db
-    validatedCustomer = await cartRepository.createCustomer(validateCustomer);
-  }
-  console.log("customerInfo", validatedCustomer);
-  //and
-  //return the object
-  return validatedCustomer;
-};
 
 //exports
 module.exports = {
@@ -617,6 +538,5 @@ module.exports = {
   deleteCart,
   changeQty,
   getCartByUserId,
-  stripeHandlePayment,
-  createCustomer,
+
 };

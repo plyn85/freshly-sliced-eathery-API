@@ -1,16 +1,15 @@
 const dotenv = require("dotenv");
-
 dotenv.config();
-
 // require imports packages required by the application
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const { auth } = require("express-openid-connect");
 const HOST = "127.0.0.1";
-const PORT = 3000;
-
+const PORT = 8000;
 // app is a new instance of express (the web app framework)
 let app = express();
+//import config
 
 // Application settings
 app.use((req, res, next) => {
@@ -18,19 +17,13 @@ app.use((req, res, next) => {
   res.setHeader("Content-Type", "application/json");
   next();
 });
-//morgan
+//configure app
 app.use(morgan("dev"));
-
 app.use(express.text());
 app.use(express.json()); // support json encoded bodies
-app.use(express.urlencoded({ extended: true })); // support url encoded bodies
+app.use(express.urlencoded({ extended: false })); // support url encoded bodies
 
 // cors
-// https://www.npmjs.com/package/cors
-// https://codesquery.com/enable-cors-nodejs-express-app/
-// Simple Usage (Enable All CORS Requests)
-// app.use(cors());
-// app.options("*", cors()); // include before other routes
 app.use(cors({ credentials: true, origin: true }));
 
 /* Configure app Routes to handle requests from browser */
@@ -40,6 +33,10 @@ app.use("/", require("./controllers/index"));
 app.use("/meals", require("./controllers/menuController"));
 //the cart page
 app.use("/cart", require("./controllers/cartController"));
+//the user  page
+app.use("/user", require("./controllers/userController"));
+//the user  page
+app.use("/payment", require("./controllers/paymentController"));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
