@@ -1,6 +1,6 @@
 //imports
 const { authConfig } = require("../middleware/jwtAuth.js");
-const customerValidation = require("../validators/customerValidation");
+const customerOrderValidation = require("../validators/customerOrderValidation");
 const userRepository = require("../repositories/userRepository");
 
 //axios
@@ -25,7 +25,7 @@ let getAuthUser = async (accessToken) => {
   //if the user data is not null
   if (userData == null) {
     //pass to repository to add to db
-    userData = await userRepository.createCustomerAfterSignUp(user.data);
+    userData = await userRepository.createCustomer(user.data);
     console.log("this user just singed up");
   } else {
     console.log("user already exists in db, createCustomer :", userData);
@@ -34,36 +34,47 @@ let getAuthUser = async (accessToken) => {
   return userData;
 };
 //
-//function to handle the customer data
-let createCustomer = async (customer) => {
+//function to handle the collection data
+let createCustomerOrder = async (customerOrder) => {
   //constants and variables
-  let validatedCustomer;
-
+  let createdCustomerOrder;
+  let customerOrderObjToBeReturned;
+  let getOrCreateCustomer;
   //validate customer and create instance
-  let validateCustomer = customerValidation.validateCustomer(customer);
-  // if the validation is a success
-  if (validateCustomer != null) {
-    //check if the user is already in the db
-    let validatedCustomer = await getCustomerInfoDbByEmail(customer.email);
-    //if the user data is not null
-    if (validatedCustomer != null) {
-      //pass to repository to add to db
-      validatedCustomer = await userRepository.createCustomer(validateCustomer);
-    } else {
-      console.log(
-        "user already exists in db, createCustomer :",
-        validatedCustomer
-      );
-    }
-    return validatedCustomer;
-  }
+  let validateCustomerOrder =
+    customerOrderValidation.validateCustomerOrder(customerOrder);
 
-  console.log("customerInfo", validatedCustomer);
-  //and
+  //
+  // if the validation is a success
+  if (validateCustomerOrder != null) {
+    //check if the customer is already in db by their email
+    getOrCreateCustomer = await getCustomerInfoDbByEmail(
+      validateCustomerOrder.email
+    );
+    //if they are not add their name and email to db
+    if (getOrCreateCustomer == null) {
+      getOrCreateCustomer = await userRepository.createCustomer(
+        validateCustomerOrder
+      );
+
+      console.log("customer created", getOrCreateCustomer);
+    }
+    //create the customer order
+    createdCustomerOrder = await userRepository.createCustomerOrder(
+      validateCustomerOrder
+    );
+  }
+  //add the order create and the customer name and email to the object
+  // to be returned
+  customerOrderObjToBeReturned = {
+    ...getOrCreateCustomer,
+    ...createdCustomerOrder,
+  };
   //return the object
-  return validatedCustomer;
+  return customerOrderObjToBeReturned;
 };
 
+//
 ///function checks if the user is in the database
 let getCustomerInfoDbByEmail = async (customerEmail) => {
   //check if the user is in db if it is not then they have just registered
@@ -83,6 +94,6 @@ let getCustomerInfoDbByEmail = async (customerEmail) => {
 //exports
 module.exports = {
   getAuthUser,
-  createCustomer,
+  createCustomerOrder,
   getCustomerInfoDbByEmail,
 };

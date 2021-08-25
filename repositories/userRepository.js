@@ -1,23 +1,21 @@
 //require the database connection
 
-const { json } = require("express");
 const { rows } = require("mssql");
 const { sql, dbConnPoolPromise } = require("../database/db.js");
 
 const sqlStatements = {
-  SQL_INSERT_CUSTOMER:
-    "INSERT INTO dbo.customer (name,email,address,delivery,collection,collection_delivery_time,message) VALUES (@name,@email,@address,@delivery,@collection,@collection_delivery_time,@message) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
+  SQL_INSERT_CUSTOMER_ORDER:
+    "INSERT INTO dbo.orders (invoice_number,amount,address,delivery,collection,collection_delivery_time,message) VALUES (@invoiceNumber,@amount,@address,@delivery,@collection,@collection_delivery_time,@message) SELECT * from dbo.orders WHERE _id = SCOPE_IDENTITY();",
   SQL_INSERT_CUSTOMER_AFTER_SIGN_UP:
     "INSERT INTO dbo.customer (name,email) VALUES (@name,@email) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
   SQL_FIND_BY_USER_EMAIL:
-    "SELECT * FROM dbo.customer WHERE email  = @email for json path, without_array_wrapper;",
+    "SELECT * FROM dbo.customer WHERE email = @email for json path, without_array_wrapper;",
 };
 
 //create an order in db
-let createCustomer = async (customerData) => {
-  console.log("auth email", typeof customerData.email);
+let createCustomerOrder = async (customerOrder) => {
   //   Declare variables
-  let customer;
+  let customerOrderCreated;
 
   //insert new customer
   try {
@@ -26,34 +24,36 @@ let createCustomer = async (customerData) => {
     const result = await pool
       .request()
       //set the name parameters in query
+
       // checks for sql injection
-      .input("name", sql.NVarChar, customerData.name)
-      .input("email", sql.NVarChar, customerData.email)
-      .input("address", sql.NVarChar, customerData.address)
-      .input("message", sql.NVarChar, customerData.message)
-      .input("delivery", sql.NVarChar, customerData.delivery)
-      .input("collection", sql.NVarChar, customerData.collection)
+      .input("invoiceNumber", sql.NVarChar, customerOrder.invoice_number)
+      .input("amount", sql.Int, customerOrder.amount)
+      .input("address", sql.NVarChar, customerOrder.address)
+      .input("message", sql.NVarChar, customerOrder.message)
+      .input("delivery", sql.NVarChar, customerOrder.delivery)
+      .input("collection", sql.NVarChar, customerOrder.collection)
       .input(
         "collection_delivery_time",
         sql.NVarChar,
-        customerData.collectionOrDeliveryTime
+        customerOrder.collectionOrDeliveryTime
       )
       //execute query
-      .query(sqlStatements.SQL_INSERT_CUSTOMER);
+      .query(sqlStatements.SQL_INSERT_CUSTOMER_ORDER);
     //the newly inserted order is returned by the query
-    customer = result.recordset[0];
-    console.log("create cus", result);
+    customerOrderCreated = result.recordset[0];
+    console.log("create customer order", customerOrderCreated);
   } catch (err) {
     console.log("DB Error - error inserting a new order: ", err.message);
   }
-  return customer;
+  return customerOrderCreated;
 };
-// SELECT * FROM dbo.customer WHERE email  = 'plyn85@hotmail.co.uk'
-//find the user in the db by email after login
+
+//find the user in the db by email
 let findUserByEmail = async (userEmail) => {
   // define variable
   let userData;
-  // userEmail = JSON.stringify(`plyn85@hotmail.co.uk`);
+  console.log("user email", userEmail);
+  console.log("is this email the same ?", userEmail === "plyn@test.com");
   try {
     const pool = await dbConnPoolPromise;
     const result = await pool
@@ -62,7 +62,7 @@ let findUserByEmail = async (userEmail) => {
       .input("email", sql.NVarChar, userEmail)
       .query(sqlStatements.SQL_FIND_BY_USER_EMAIL);
     userData = result.recordset[0];
-
+    console.log("find user by email", result);
     //return the user data
     return userData;
     // Catch and log errors to server side console
@@ -75,10 +75,16 @@ let findUserByEmail = async (userEmail) => {
 };
 
 //add to db for customer that already has a email in the db from auth0 sign up
-let createCustomerAfterSignUp = async (customerData) => {
+let createCustomer = async (customerData) => {
   //   Declare variables
   let customer;
-
+  let name;
+  let nickNameExists;
+  console.log("cus email", customerData.email);
+  //check which key is in customerData obj
+  nickNameExists = "nickname" in customerData;
+  //if nickname does exist make name equal nickname otherwise it remains name
+  name = nickNameExists ? customerData.nickname : customerData.name;
   //insert new customer after sign up only name and email
   // will be added to the db
   try {
@@ -88,24 +94,20 @@ let createCustomerAfterSignUp = async (customerData) => {
       .request()
       //set the name parameters in query
       // checks for sql injection
-      .input("name", sql.NVarChar, customerData.nickname)
+      .input("name", sql.NVarChar, name)
       .input("email", sql.NVarChar, customerData.email)
       //execute query
       .query(sqlStatements.SQL_INSERT_CUSTOMER_AFTER_SIGN_UP);
     //the newly inserted order is returned by the query
     customer = result.recordset[0];
-    console.log("create cus after sign up", result);
   } catch (err) {
-    console.log(
-      "DB Error - error inserting newly signed up customer: ",
-      err.message
-    );
+    console.log("DB Error - error inserting customer: ", err.message);
   }
   return customer;
 };
 
 module.exports = {
-  createCustomer,
+  createCustomerOrder,
   findUserByEmail,
-  createCustomerAfterSignUp,
+  createCustomer,
 };

@@ -1,4 +1,6 @@
 function CustomerOrderForm(
+  name,
+  email,
   invoice_number,
   amount,
   collectionOrDeliveryTime,
@@ -7,6 +9,8 @@ function CustomerOrderForm(
   collection,
   delivery
 ) {
+  this.name = name;
+  this.email = email;
   this.invoice_number = invoice_number;
   this.amount = amount;
   this.collectionOrDeliveryTime = collectionOrDeliveryTime;
