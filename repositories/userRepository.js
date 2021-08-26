@@ -5,7 +5,7 @@ const { sql, dbConnPoolPromise } = require("../database/db.js");
 
 const sqlStatements = {
   SQL_INSERT_CUSTOMER_ORDER:
-    "INSERT INTO dbo.orders (invoice_number,amount,address,delivery,collection,collection_delivery_time,message) VALUES (@invoiceNumber,@amount,@address,@delivery,@collection,@collection_delivery_time,@message) SELECT * from dbo.orders WHERE _id = SCOPE_IDENTITY();",
+    "INSERT INTO dbo.orders (invoice_number,amount,address,delivery,collection,collection_delivery_time,message,customer_id) VALUES (@invoiceNumber,@amount,@address,@delivery,@collection,@collection_delivery_time,@message,@customer_id) SELECT * from dbo.orders WHERE _id = SCOPE_IDENTITY();",
   SQL_INSERT_CUSTOMER_AFTER_SIGN_UP:
     "INSERT INTO dbo.customer (name,email) VALUES (@name,@email) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
   SQL_FIND_BY_USER_EMAIL:
@@ -13,7 +13,7 @@ const sqlStatements = {
 };
 
 //create an order in db
-let createCustomerOrder = async (customerOrder) => {
+let createCustomerOrder = async (customerOrder, customerOrderId) => {
   //   Declare variables
   let customerOrderCreated;
 
@@ -32,6 +32,7 @@ let createCustomerOrder = async (customerOrder) => {
       .input("message", sql.NVarChar, customerOrder.message)
       .input("delivery", sql.NVarChar, customerOrder.delivery)
       .input("collection", sql.NVarChar, customerOrder.collection)
+      .input("customer_id", sql.Int, customerOrderId)
       .input(
         "collection_delivery_time",
         sql.NVarChar,

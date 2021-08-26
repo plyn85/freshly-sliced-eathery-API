@@ -59,13 +59,14 @@ let createCustomerOrder = async (customerOrder) => {
 
       console.log("customer created", getOrCreateCustomer);
     }
-    //create the customer order
+    //create the customer order pass the PK id of the created customer
+    //which wiLL be the FK of the of the order table
     createdCustomerOrder = await userRepository.createCustomerOrder(
-      validateCustomerOrder
+      validateCustomerOrder,
+      getOrCreateCustomer._id
     );
   }
-  //add the order create and the customer name and email to the object
-  // to be returned
+  //add the order and customer info to the object
   customerOrderObjToBeReturned = {
     ...getOrCreateCustomer,
     ...createdCustomerOrder,
