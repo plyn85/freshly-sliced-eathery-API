@@ -11,39 +11,33 @@ router.get(
   checkJwt,
   //checkAuth([authConfig.read]),
   async (req, res) => {
-    res.json("request heard");
-    console.log(req.headers["authorization"]);
     //   // if logged in (therefore access token exists)
     //
     if (req.headers["authorization"]) {
       try {
         let token = await req.headers["authorization"].replace("Bearer ", "");
-        const userProfile = await userService.getAuthUser(token);
-        console.log("%c user profile: ", "color: blue", userProfile);
-        console.log("%c user email: ", "color: blue", userProfile.email);
+        const customerInfo = await userService.getAuthUser(token);
+        //log the user profile to the console
+        console.log("customer info-login route: ", customerInfo);
+        //return the user profile info to the client
+        res.json(customerInfo);
       } catch (err) {
-        console.log(`ERROR getting user profile: ${err.message}`);
+        console.log(`ERROR getting customer info : ${err.message}`);
+        res.status(500);
       }
-    }
-    try {
-      let result = await getAuthUser();
-      console.log("collection order", result._id);
-      res.json(result);
-    } catch (err) {
-      res.status(500);
     }
   }
 );
 
 //to handle collection or delivery info and create a customer in the db
-router.post("/collectionOrDelivery", async (req, res) => {
+router.post("/create-customer-order", async (req, res) => {
   //getting the body of the request
-  let customerData = req.body;
-  console.log(customerData);
+  let customerOrderData = req.body;
+
   //sending the request body to collection function
   try {
-    let result = await userService.createCustomer(customerData);
-    console.log("collection order", result._id);
+    let result = await userService.createCustomerOrder(customerOrderData);
+    console.log("result", result);
     res.json(result);
   } catch (err) {
     res.status(500);

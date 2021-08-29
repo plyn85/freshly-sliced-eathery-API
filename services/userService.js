@@ -6,7 +6,10 @@ const userRepository = require("../repositories/userRepository");
 //axios
 
 const axios = require("axios").default;
-
+//constants and variables
+let customerAddress;
+let customerNameAndEmail;
+let createOrGetCustomer;
 //get the user info from auth
 let getAuthUser = async (accessToken) => {
   //get user info from auth0
@@ -19,19 +22,28 @@ let getAuthUser = async (accessToken) => {
   //use access to make request
   const user = await axios.get(url, config);
 
-  //pass the users email to the function that finds user by email
-  let userData = await getCustomerInfoDbByEmail(user.data.email);
-  console.log(" auth by email userData: ", userData);
-  //if the user data is not null
-  if (userData == null) {
+  //pass the customers email to the function that finds user by email
+  customerNameAndEmail = await getCustomerInfoDbByEmail(user.data.email);
+
+  //if the customer is not in the db
+  if (customerNameAndEmail == null) {
     //pass to repository to add to db
-    userData = await userRepository.createCustomer(user.data);
-    console.log("this user just singed up");
+    createOrGetCustomer = await userRepository.createCustomer(user.data);
+    // console.log("this user just singed up");
   } else {
-    console.log("user already exists in db, createCustomer :", userData);
+    //customer has already singed up so query the db for there address
+    customerAddress = await userRepository.getCustomerAddress(
+      customerNameAndEmail._id
+    );
+
+    //add the customers address to the object to be returned
+    createOrGetCustomer = {
+      ...customerAddress,
+      ...customerNameAndEmail,
+    };
   }
 
-  return userData;
+  return createOrGetCustomer;
 };
 //
 //function to handle the collection data

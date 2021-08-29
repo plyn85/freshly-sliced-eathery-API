@@ -10,6 +10,8 @@ const sqlStatements = {
     "INSERT INTO dbo.customer (name,email) VALUES (@name,@email) SELECT * from dbo.customer WHERE _id = SCOPE_IDENTITY();",
   SQL_FIND_BY_USER_EMAIL:
     "SELECT * FROM dbo.customer WHERE email = @email for json path, without_array_wrapper;",
+  SQL_FIND_CUSTOMER_ADDRESS:
+    "SELECT address FROM dbo.orders WHERE customer_id = @userId  for json path, without_array_wrapper;",
 };
 
 //create an order in db
@@ -81,7 +83,7 @@ let createCustomer = async (customerData) => {
   let customer;
   let name;
   let nickNameExists;
-  console.log("cus email", customerData.email);
+
   //check which key is in customerData obj
   nickNameExists = "nickname" in customerData;
   //if nickname does exist make name equal nickname otherwise it remains name
@@ -106,9 +108,34 @@ let createCustomer = async (customerData) => {
   }
   return customer;
 };
+//
+//
+//find the user in the db by email
+let getCustomerAddress = async (userId) => {
+  // define variable
+  let customerAddress;
+  try {
+    const pool = await dbConnPoolPromise;
+    const result = await pool
+      .request()
+      // checks for sql injection
+      .input("userId", sql.Int, userId)
+      .query(sqlStatements.SQL_FIND_CUSTOMER_ADDRESS);
+    customerAddress = result.recordset[0];
+    //return the user data
 
+    return customerAddress;
+    // Catch and log errors to server side console
+  } catch (err) {
+    console.log("DB Error - getCustomerAddress: ", err.message);
+  }
+
+  // return user id
+  return customerAddress;
+};
 module.exports = {
   createCustomerOrder,
   findUserByEmail,
   createCustomer,
+  getCustomerAddress,
 };
