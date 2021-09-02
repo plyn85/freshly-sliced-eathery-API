@@ -2,18 +2,14 @@
 const router = require("express").Router();
 const cartService = require("../services/cartService");
 
-const { json } = require("body-parser");
-const { request } = require("express");
-
 // add an item to the cart
 router.post("/", async (req, res) => {
+  //get the meal id and the entire body from the body of the request
+  const cartItem = req.body;
   try {
-    //get the meal id and the entire body from the body of the request
-    const cartItem = req.body;
-
     //call the menu service pass them the mealDetails and the cartItem
     const result = await cartService.addItemToCart(cartItem);
-    //console.log("controller", result);
+    console.log(" add Item to cart controller :", result);
     //send the json result via http
     res.json(result);
   } catch (err) {
@@ -87,37 +83,7 @@ router.put("/increaseQty", async (req, res) => {
 
   try {
     let result = await cartService.changeQty(mealData);
-    console.log(result);
-    res.json(result);
-  } catch (err) {
-    res.status(500);
-  }
-});
 
-//to handle stripe payments
-router.post("/payment/:id", async (req, res) => {
-  //get stipe body and cart id from the request body
-  let stripeBody = req.body;
-  let userId = req.params.id;
-
-  try {
-    let result = await cartService.stripeHandlePayment(stripeBody, userId);
-    console.log("amount", result);
-    res.json(result);
-  } catch (err) {
-    res.status(500);
-  }
-});
-
-//to handle collection or delivery info
-router.post("/collectionOrDelivery", async (req, res) => {
-  //getting the body of the request
-  let customerData = req.body;
-  console.log(customerData);
-  //sending the request body to collection function
-  try {
-    let result = await cartService.createCustomer(customerData);
-    console.log("collection order", result._id);
     res.json(result);
   } catch (err) {
     res.status(500);
